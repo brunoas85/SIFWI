@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useEstacion } from '../hooks/useEstacion'
 import { InsigniaFwi } from '../components/ui/InsigniaFwi'
 import { Cargando } from '../components/ui/Cargando'
@@ -60,9 +60,17 @@ export function DetalleEstacion() {
             </div>
 
             <div className="bg-white rounded-xl border border-gray-200 p-5">
-              <h2 className="font-semibold text-gray-700 mb-4 text-sm uppercase tracking-wide">
-                Índices FWI
-              </h2>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="font-semibold text-gray-700 text-sm uppercase tracking-wide">
+                  Índices FWI
+                </h2>
+                <Link
+                  to={`/estacion/${id}/indices`}
+                  className="text-sm font-medium text-blue-600 hover:underline whitespace-nowrap"
+                >
+                  Ver evolución histórica →
+                </Link>
+              </div>
               <dl className="grid grid-cols-2 gap-4">
                 {[
                   { etiqueta: 'FFMC', valor: estacion.FFMC },

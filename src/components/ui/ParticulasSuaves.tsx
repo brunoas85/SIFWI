@@ -41,7 +41,7 @@ export function ParticulasSuaves() {
           style={{
             left: `${p.izquierda}%`,
             width: p.tamaño,
-            height: p.tamaño,
+            height: p.tamaño * 1.6,
             background: p.color,
             color: p.color,
             animationDuration: `${p.duracion}s`,

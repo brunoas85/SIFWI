@@ -91,6 +91,12 @@ export interface VistaFwiItem {
   hora: string
 }
 
+export interface RespuestaLogin {
+  status: string
+  token: string
+  usuario: string
+}
+
 export interface VistaMeteorItem {
   estacion: string
   estacion_id: string

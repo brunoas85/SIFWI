@@ -15,7 +15,7 @@ export function Inicio() {
   return (
     <div>
       <div className="mb-5">
-        <h1 className="text-2xl font-bold text-gray-900">Estaciones meteorológicas</h1>
+        <h2 className="text-xl font-bold text-gray-900">Estaciones meteorológicas</h2>
         <p className="text-sm text-gray-500 mt-1">
           {estaciones.length} estaciones · último registro disponible
         </p>
