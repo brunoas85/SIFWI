@@ -10,7 +10,7 @@ import { Comparar } from './pages/Comparar'
 
 function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/SIFWI">
       <AuthProvider>
         <Routes>
           <Route path="/login" element={<Login />} />
