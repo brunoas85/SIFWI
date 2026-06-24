@@ -33,8 +33,8 @@ export function Login() {
         <div className="h-1.5 bg-gradient-to-r from-emerald-400 via-amber-400 to-red-500" />
         <div className="px-8 py-10">
           <div className="flex justify-center gap-6 mb-6">
-            <img src="/logo_pnl.png" alt="Logo Parque Nacional Lanín" className="h-12 w-auto object-contain" />
-            <img src="/logo_ice.png" alt="Logo ICE" className="h-12 w-auto object-contain" />
+            <img src={`${import.meta.env.BASE_URL}logo_pnl.png`} alt="Logo Parque Nacional Lanín" className="h-12 w-auto object-contain" />
+            <img src={`${import.meta.env.BASE_URL}logo_ice.png`} alt="Logo ICE" className="h-12 w-auto object-contain" />
           </div>
           <h1 className="text-xl font-bold text-gray-900 text-center uppercase tracking-wide mb-1">
             SIFWI

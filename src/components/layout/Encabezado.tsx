@@ -20,7 +20,7 @@ export function Encabezado() {
       <div className="px-4 sm:px-6 lg:px-10 py-[28px] sm:py-[33px] flex items-center justify-between gap-4">
         <NavLink to="/" className="flex items-center gap-4 sm:gap-5 shrink-0">
           <img
-            src="/logo_pnl.png"
+            src={`${import.meta.env.BASE_URL}logo_pnl.png`}
             alt="Logo Parque Nacional Lanín"
             className="h-12 sm:h-14 w-auto object-contain shrink-0"
           />
@@ -34,7 +34,7 @@ export function Encabezado() {
           </div>
           <span className="text-2xl font-bold text-white md:hidden">SIFWI</span>
           <img
-            src="/logo_ice.png"
+            src={`${import.meta.env.BASE_URL}logo_ice.png`}
             alt="Logo ICE"
             className="h-12 sm:h-14 w-auto object-contain shrink-0"
           />

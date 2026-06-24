@@ -45,7 +45,7 @@ export function Inicio() {
           </div>
           <div className="flex-1 bg-gray-50" style={{ height: 440 }}>
             <img
-              src="/RedEstacionesPNL.png"
+              src={`${import.meta.env.BASE_URL}RedEstacionesPNL.png`}
               alt="Mapa de la red de estaciones meteorológicas del Parque Nacional Lanín"
               className="w-full h-full object-contain"
             />
