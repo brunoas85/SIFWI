@@ -2,38 +2,36 @@ import { useState, useMemo } from 'react'
 import { useHistorialAnual } from '../../hooks/useHistorialAnual'
 import { GraficoLinea } from './GraficoLinea'
 import { Cargando } from '../ui/Cargando'
-import { agregarPorMes } from '../../utils/series'
+import { agregarPorDia, redondearMax, DIAS_DEL_ANIO } from '../../utils/series'
 import type { RegistroHistorial } from '../../types'
 
 const AÑO_ACTUAL = new Date().getFullYear()
-// La red de estaciones del PNL tiene registros desde 2022
 const AÑO_INICIO_RED = 2022
 const AÑOS_DISPONIBLES = Array.from(
   { length: AÑO_ACTUAL - AÑO_INICIO_RED + 1 },
   (_, i) => AÑO_INICIO_RED + i
 )
-// Gradiente inspirado en la escala de peligro FWI: de templado a extremo
 const PALETA = ['#0ea5e9', '#22c55e', '#eab308', '#f97316', '#dc2626', '#7c3aed']
 const COLORES: Record<number, string> = Object.fromEntries(
   AÑOS_DISPONIBLES.map((año, i) => [año, PALETA[i % PALETA.length]])
 )
-
-const MESES = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic']
 
 export interface ConfigGrafico {
   titulo: string
   unidad: string
   getter: (r: RegistroHistorial) => number | null
   esSuma?: boolean
+  dominioFijo?: [number, number]
 }
 
 interface Props {
   id: string
   titulo: string
   graficos: ConfigGrafico[]
+  homologarEscalas?: boolean
 }
 
-export function GraficosSeriesAnuales({ id, titulo, graficos }: Props) {
+export function GraficosSeriesAnuales({ id, titulo, graficos, homologarEscalas = true }: Props) {
   const [añosSeleccionados, setAñosSeleccionados] = useState<number[]>([
     AÑO_ACTUAL - 1,
     AÑO_ACTUAL,
@@ -49,21 +47,32 @@ export function GraficosSeriesAnuales({ id, titulo, graficos }: Props) {
     )
   }
 
+  const conteos = useMemo(() =>
+    Object.fromEntries(
+      Object.entries(resultados).map(([k, v]) => [Number(k), v.registros.length])
+    ),
+    [resultados]
+  )
+
+  const errorGlobal = useMemo(() =>
+    Object.values(resultados).find(v => v.error)?.error ?? null,
+    [resultados]
+  )
+
   const datosGraficos = useMemo(() => {
     return graficos.map(cfg => {
-      const agregadosPorAño: Record<number, (number | null)[]> = {}
+      const agregadosPorAño: Record<number, Record<string, number | null>> = {}
       añosSeleccionados.forEach(año => {
         const res = resultados[año]
         if (res?.registros?.length) {
-          agregadosPorAño[año] = agregarPorMes(res.registros, cfg.getter, cfg.esSuma)
+          agregadosPorAño[año] = agregarPorDia(res.registros, cfg.getter, cfg.esSuma)
         }
       })
 
-      const puntos = MESES.map((mes, i) => {
-        const punto: Record<string, string | number | null> = { mes }
+      const puntos = DIAS_DEL_ANIO.map(dia => {
+        const punto: Record<string, string | number | null> = { dia }
         añosSeleccionados.forEach(año => {
-          const vals = agregadosPorAño[año]
-          const raw = vals?.[i] ?? null
+          const raw = agregadosPorAño[año]?.[dia] ?? null
           punto[String(año)] = raw !== null ? parseFloat(raw.toFixed(2)) : null
         })
         return punto
@@ -73,24 +82,61 @@ export function GraficosSeriesAnuales({ id, titulo, graficos }: Props) {
         añosSeleccionados.some(año => p[String(año)] !== null)
       )
 
-      return { titulo: cfg.titulo, unidad: cfg.unidad, esSuma: cfg.esSuma, puntos, tieneDatos }
+      return {
+        titulo: cfg.titulo,
+        unidad: cfg.unidad,
+        esSuma: cfg.esSuma,
+        dominioFijo: cfg.dominioFijo,
+        puntos,
+        tieneDatos,
+      }
     })
   }, [resultados, añosSeleccionados, graficos])
 
-  const conteos = useMemo(() =>
-    Object.fromEntries(
-      Object.entries(resultados).map(([k, v]) => [Number(k), v.registros.length])
-    ),
-    [resultados]
-  )
+  const maxComunResto = useMemo(() => {
+    if (!homologarEscalas) return 0
+    let max = 0
+    datosGraficos.forEach(g => {
+      if (g.dominioFijo) return
+      g.puntos.forEach(p => {
+        añosSeleccionados.forEach(año => {
+          const v = p[String(año)]
+          if (typeof v === 'number' && v > max) max = v
+        })
+      })
+    })
+    return redondearMax(max)
+  }, [datosGraficos, añosSeleccionados, homologarEscalas])
 
-  const erroresPorAño = useMemo(() =>
-    Object.fromEntries(
-      Object.entries(resultados)
-        .filter(([, v]) => v.error)
-        .map(([k, v]) => [Number(k), v.error])
-    ),
-    [resultados]
+  // Botones de año reutilizables (se pasan al modal de cada gráfico)
+  const botonesAño = (
+    <>
+      {AÑOS_DISPONIBLES.map((año, i) => {
+        const activo = añosSeleccionados.includes(año)
+        const conteo = conteos[año]
+        return (
+          <button
+            key={año}
+            onClick={() => alternarAño(año)}
+            title={conteo !== undefined ? `${conteo} registros` : undefined}
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs border transition-all ${
+              activo
+                ? 'bg-white border-gray-200 text-gray-700 font-medium shadow-sm'
+                : 'bg-white text-gray-400 border-gray-100 hover:border-gray-200 hover:text-gray-500'
+            }`}
+          >
+            <span
+              className="w-2 h-2 rounded-full flex-shrink-0 transition-all"
+              style={{ background: activo ? PALETA[i] : '#e5e7eb' }}
+            />
+            {año}
+            {conteo === 0 && (
+              <span className="text-[10px] text-gray-300">sin datos</span>
+            )}
+          </button>
+        )
+      })}
+    </>
   )
 
   return (
@@ -101,47 +147,19 @@ export function GraficosSeriesAnuales({ id, titulo, graficos }: Props) {
           <h2 className="font-semibold text-gray-700 text-sm uppercase tracking-wide">
             {titulo}
           </h2>
-          <div className="flex flex-wrap gap-2">
-            {AÑOS_DISPONIBLES.map((año, i) => {
-              const activo = añosSeleccionados.includes(año)
-              const conteo = conteos[año]
-              return (
-                <button
-                  key={año}
-                  onClick={() => alternarAño(año)}
-                  title={erroresPorAño[año] ?? undefined}
-                  className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition-all ${
-                    activo
-                      ? 'text-white border-transparent'
-                      : 'bg-white text-gray-500 border-gray-200 hover:border-gray-300'
-                  }`}
-                  style={activo ? { background: PALETA[i], borderColor: PALETA[i] } : {}}
-                >
-                  {año}
-                  {conteo !== undefined && (
-                    <span className={`ml-1.5 text-xs font-normal ${activo ? 'opacity-75' : 'text-gray-400'}`}>
-                      ({conteo === 0 ? 'sin datos' : `${conteo} reg.`})
-                    </span>
-                  )}
-                </button>
-              )
-            })}
+          <div className="flex flex-wrap gap-1.5">
+            {botonesAño}
           </div>
         </div>
 
-        {/* Errores por año */}
-        {Object.entries(erroresPorAño).length > 0 && (
-          <div className="mb-4 flex flex-wrap gap-2">
-            {Object.entries(erroresPorAño).map(([año, err]) => (
-              <span key={año} className="text-xs text-red-500 bg-red-50 px-2 py-1 rounded">
-                {año}: {err}
-              </span>
-            ))}
+        {errorGlobal && (
+          <div className="mb-4 text-xs text-red-500 bg-red-50 px-3 py-2 rounded-lg">
+            {errorGlobal}
           </div>
         )}
 
         {cargando ? (
-          <Cargando mensaje="Cargando datos anuales..." />
+          <Cargando mensaje="Cargando datos históricos..." />
         ) : añosSeleccionados.length === 0 ? (
           <p className="text-gray-400 text-sm text-center py-10">
             Seleccioná al menos un año.
@@ -158,6 +176,8 @@ export function GraficosSeriesAnuales({ id, titulo, graficos }: Props) {
                     años={añosSeleccionados}
                     colores={COLORES}
                     esSuma={g.esSuma}
+                    dominio={homologarEscalas ? (g.dominioFijo ?? [0, maxComunResto]) : g.dominioFijo}
+                    controles={botonesAño}
                   />
                 ) : (
                   <div className="bg-gray-50 rounded-xl border border-gray-100 p-4">
