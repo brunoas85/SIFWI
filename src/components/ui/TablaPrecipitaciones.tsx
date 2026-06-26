@@ -1,81 +1,60 @@
-import { useState, useEffect, useMemo } from 'react'
-import { obtenerHistorial, obtenerConfigEstaciones } from '../../api/fwi'
+import { useState, useEffect } from 'react'
+import * as XLSX from 'xlsx'
 import { Cargando } from './Cargando'
-
-const AÑO_ACTUAL = new Date().getFullYear()
-const AÑO_INICIO_RED = 2022
-const AÑOS = Array.from(
-  { length: AÑO_ACTUAL - AÑO_INICIO_RED + 1 },
-  (_, i) => AÑO_INICIO_RED + i
-)
 
 interface FilaEstacion {
   nombre: string
-  sumas: Record<number, number>
+  valores: Record<number, number>
+}
+
+interface DatosTabla {
+  años: number[]
+  filas: FilaEstacion[]
 }
 
 export function TablaPrecipitaciones() {
-  const [filas, setFilas] = useState<FilaEstacion[]>([])
+  const [datos, setDatos] = useState<DatosTabla | null>(null)
   const [cargando, setCargando] = useState(true)
-  const [progreso, setProgreso] = useState(0)
-  const [total, setTotal] = useState(0)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     let cancelado = false
-
-    obtenerConfigEstaciones()
-      .then(config => {
-        const activas = Object.entries(config).filter(([, cfg]) => cfg.activa)
+    fetch('/EstacionesAnual.xlsx')
+      .then(r => r.arrayBuffer())
+      .then(buf => {
         if (cancelado) return
-        setTotal(activas.length)
+        const wb = XLSX.read(buf, { type: 'array' })
+        const ws = wb.Sheets[wb.SheetNames[0]]
+        const rows = XLSX.utils.sheet_to_json<(string | number)[]>(ws, { header: 1, defval: '' })
 
-        const resultados: FilaEstacion[] = []
+        // Fila 1 (índice 1): ["", año1, año2, ...]
+        const añoRow = rows[1] as (string | number)[]
+        const años = añoRow.slice(1).filter(v => typeof v === 'number' && v > 2000) as number[]
 
-        return Promise.all(
-          activas.map(([id, cfg]) =>
-            obtenerHistorial(id)
-              .then(res => {
-                const sumas: Record<number, number> = {}
-                res.datos.forEach(r => {
-                  const yrStr = String(r.Date ?? '').replace(/-/g, '').slice(0, 4)
-                  const año = parseInt(yrStr, 10)
-                  const ppt = parseFloat(String(r.PPT))
-                  if (!isNaN(año) && !isNaN(ppt) && ppt >= 0) {
-                    sumas[año] = (sumas[año] ?? 0) + ppt
-                  }
-                })
-                resultados.push({ nombre: cfg.nombre, sumas })
-              })
-              .catch(() => {
-                resultados.push({ nombre: cfg.nombre, sumas: {} })
-              })
-              .finally(() => {
-                if (!cancelado) setProgreso(p => p + 1)
-              })
-          )
-        ).then(() => {
-          if (!cancelado) {
-            setFilas(resultados.sort((a, b) => a.nombre.localeCompare(b.nombre)))
-            setCargando(false)
-          }
-        })
+        // Filas 2+: [nombre, val1, val2, ...]
+        const filas: FilaEstacion[] = rows.slice(2)
+          .filter(row => row[0])
+          .map(row => {
+            const nombre = String(row[0])
+            const valores: Record<number, number> = {}
+            años.forEach((año, i) => {
+              const v = row[i + 1]
+              if (typeof v === 'number') valores[año] = v
+            })
+            return { nombre, valores }
+          })
+
+        setDatos({ años, filas })
+        setCargando(false)
       })
       .catch(err => {
         if (!cancelado) { setError(err?.message ?? 'Error al cargar datos'); setCargando(false) }
       })
-
     return () => { cancelado = true }
   }, [])
 
-  const añosConDatos = useMemo(
-    () => AÑOS.filter(año => filas.some(f => (f.sumas[año] ?? 0) > 0)),
-    [filas]
-  )
-
-  const mensajeCarga = total > 0
-    ? `Cargando estaciones... ${progreso}/${total}`
-    : 'Cargando...'
+  const años = datos?.años ?? []
+  const filas = datos?.filas ?? []
 
   return (
     <div className="rounded-xl overflow-hidden border border-gray-200 shadow-sm bg-white flex flex-col">
@@ -86,7 +65,7 @@ export function TablaPrecipitaciones() {
       </div>
 
       <div className="flex-1 overflow-auto" style={{ height: 440 }}>
-        {cargando && <Cargando mensaje={mensajeCarga} />}
+        {cargando && <Cargando mensaje="Cargando..." />}
 
         {error && (
           <div className="flex items-center justify-center h-full">
@@ -98,11 +77,11 @@ export function TablaPrecipitaciones() {
           <table className="w-full text-sm">
             <thead className="sticky top-0 bg-white border-b border-gray-100 z-10">
               <tr className="text-[11px] uppercase tracking-wide">
-                <th className="text-left px-4 py-3 font-medium text-gray-400">
+                <th className="text-left pl-4 pr-2 py-3 font-medium text-gray-400">
                   Estación
                 </th>
-                {añosConDatos.map(año => (
-                  <th key={año} className="text-right px-4 py-3 font-semibold text-blue-500 tabular-nums">
+                {años.map((año, i) => (
+                  <th key={año} className={`text-right py-3 font-semibold text-blue-500 tabular-nums ${i === años.length - 1 ? 'pl-3 pr-4' : 'px-3'}`}>
                     {año}
                   </th>
                 ))}
@@ -111,14 +90,14 @@ export function TablaPrecipitaciones() {
             <tbody>
               {filas.map((f, i) => (
                 <tr key={i} className="border-b border-gray-50 hover:bg-blue-50/30 transition-colors">
-                  <td className="px-4 py-2.5">
+                  <td className="pl-4 pr-2 py-2.5">
                     <span className="text-xs font-medium text-gray-800">{f.nombre}</span>
                   </td>
-                  {añosConDatos.map(año => (
-                    <td key={año} className="px-4 py-2.5 text-right tabular-nums">
-                      {(f.sumas[año] ?? 0) > 0 ? (
+                  {años.map((año, i) => (
+                    <td key={año} className={`py-2.5 text-right tabular-nums ${i === años.length - 1 ? 'pl-3 pr-4' : 'px-3'}`}>
+                      {f.valores[año] != null ? (
                         <span className="text-xs font-semibold text-gray-700">
-                          {Math.round(f.sumas[año])}
+                          {f.valores[año]}
                         </span>
                       ) : (
                         <span className="text-xs text-gray-300">—</span>
@@ -130,8 +109,8 @@ export function TablaPrecipitaciones() {
             </tbody>
             <tfoot>
               <tr>
-                <td colSpan={añosConDatos.length + 1} className="px-4 pt-2 pb-3 text-right">
-                  <span className="text-[10px] text-gray-300">mm · acumulado anual</span>
+                <td colSpan={años.length + 1} className="px-4 pt-2 pb-3 text-right">
+                  <span className="text-xs text-gray-400">mm · acumulado anual</span>
                 </td>
               </tr>
             </tfoot>

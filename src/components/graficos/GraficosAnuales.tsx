@@ -4,6 +4,7 @@ const GRAFICOS: ConfigGrafico[] = [
   {
     titulo: 'Temperatura',
     unidad: '°C',
+    dominioFijo: [-10, 45],
     getter: r => {
       const v = parseFloat(String(r.Temp))
       return isNaN(v) ? null : v
@@ -21,6 +22,7 @@ const GRAFICOS: ConfigGrafico[] = [
   {
     titulo: 'Humedad relativa',
     unidad: '%',
+    dominioFijo: [0, 100],
     getter: r => {
       const v = parseFloat(String(r.HR))
       return isNaN(v) ? null : v

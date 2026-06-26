@@ -4,6 +4,7 @@ import { InsigniaFwi } from './InsigniaFwi'
 import { Cargando } from './Cargando'
 import { MensajeError } from './MensajeError'
 import { f1, f2 } from '../../utils/formato'
+import { formatearFecha } from '../../utils/fecha'
 import { exportarExcel } from '../../utils/exportar'
 
 interface Props {
@@ -120,7 +121,7 @@ export function TablaHistorial({ id, nombre }: Props) {
               <tbody>
                 {datos.map((r, i) => (
                   <tr key={i} className="border-b border-gray-50 hover:bg-gray-50">
-                    <td className="py-2 pr-4 text-gray-500">{r.Date}</td>
+                    <td className="py-2 pr-4 text-gray-500">{formatearFecha(r.Date)}</td>
                     <td className="py-2 pr-4 text-gray-500">{r.Hora}</td>
                     <td className="py-2 pr-4">{f1(r.Temp)}</td>
                     <td className="py-2 pr-4">{f1(r.HR)}</td>

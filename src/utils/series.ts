@@ -1,38 +1,42 @@
 import type { RegistroHistorial } from '../types'
+import { claveDiaMes } from './fecha'
 
-export function extraerMes(fecha: string): number {
-  if (!fecha) return -1
-  // La API devuelve las fechas como YYYYMMDD sin separadores
-  if (/^\d{8}$/.test(fecha)) {
-    return parseInt(fecha.slice(4, 6), 10) - 1
-  }
-  // Soporta YYYY-MM-DD y YYYY/MM/DD
-  const partes = fecha.split(/[-/]/)
-  if (partes.length >= 3 && partes[0].length === 4) {
-    return parseInt(partes[1], 10) - 1
-  }
-  // DD/MM/YYYY o DD-MM-YYYY
-  if (partes.length >= 3 && partes[2].length === 4) {
-    return parseInt(partes[1], 10) - 1
-  }
-  return -1
-}
+// Claves "MM-DD" de los 366 días del año (incluye 29/02 para años bisiestos)
+const DIAS_POR_MES = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+export const DIAS_DEL_ANIO: string[] = DIAS_POR_MES.flatMap((dias, mes) =>
+  Array.from({ length: dias }, (_, i) => `${String(mes + 1).padStart(2, '0')}-${String(i + 1).padStart(2, '0')}`)
+)
 
-export function agregarPorMes(
+export const INICIOS_MES: string[] = Array.from({ length: 12 }, (_, i) => `${String(i + 1).padStart(2, '0')}-01`)
+
+export function agregarPorDia(
   datos: RegistroHistorial[],
   getter: (r: RegistroHistorial) => number | null,
   esSuma = false
-): (number | null)[] {
-  const porMes: number[][] = Array.from({ length: 12 }, () => [])
+): Record<string, number | null> {
+  const porDia: Record<string, number[]> = {}
   datos.forEach(r => {
-    const mes = extraerMes(r.Date)
-    if (mes < 0 || mes > 11) return
+    const clave = claveDiaMes(r.Date)
+    if (!clave) return
     const val = getter(r)
-    if (val !== null) porMes[mes].push(val)
+    if (val === null) return
+    if (!porDia[clave]) porDia[clave] = []
+    porDia[clave].push(val)
   })
-  return porMes.map(vals => {
-    if (vals.length === 0) return null
+  const resultado: Record<string, number | null> = {}
+  Object.entries(porDia).forEach(([clave, vals]) => {
     const suma = vals.reduce((a, b) => a + b, 0)
-    return esSuma ? suma : suma / vals.length
+    resultado[clave] = esSuma ? suma : suma / vals.length
   })
+  return resultado
+}
+
+// Redondea hacia arriba a un número "lindo" para usar como máximo de eje Y
+export function redondearMax(valor: number): number {
+  if (valor <= 0) return 10
+  const pasos = [1, 2, 5, 10, 20, 25, 50, 100, 150, 200, 250, 500, 750, 1000]
+  for (const paso of pasos) {
+    if (valor <= paso) return paso
+  }
+  return Math.ceil(valor / 500) * 500
 }

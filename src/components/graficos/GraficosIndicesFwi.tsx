@@ -21,5 +21,12 @@ interface Props {
 }
 
 export function GraficosIndicesFwi({ id }: Props) {
-  return <GraficosSeriesAnuales id={id} titulo="Evolución de índices FWI" graficos={GRAFICOS} />
+  return (
+    <GraficosSeriesAnuales
+      id={id}
+      titulo="Evolución de índices FWI"
+      graficos={GRAFICOS}
+      homologarEscalas={false}
+    />
+  )
 }
