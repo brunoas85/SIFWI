@@ -58,13 +58,13 @@ export function TablaPrecipitaciones() {
 
   return (
     <div className="rounded-xl overflow-hidden border border-gray-200 shadow-sm bg-white flex flex-col">
-      <div className="px-4 py-2.5 border-b border-gray-100 bg-gradient-to-r from-blue-50 via-sky-50 to-cyan-50">
+      <div className="px-4 py-1.5 border-b border-gray-100 bg-gradient-to-r from-blue-50 via-sky-50 to-cyan-50">
         <p className="text-xs font-semibold text-blue-800 uppercase tracking-wide">
           Precipitaciones anuales · Parque Nacional Lanín
         </p>
       </div>
 
-      <div className="flex-1 overflow-auto" style={{ height: 440 }}>
+      <div className="flex-1 overflow-auto" style={{ maxHeight: 440 }}>
         {cargando && <Cargando mensaje="Cargando..." />}
 
         {error && (
@@ -74,43 +74,43 @@ export function TablaPrecipitaciones() {
         )}
 
         {!cargando && !error && (
-          <table className="w-full text-sm">
+          <table className="w-full text-xs">
             <thead className="sticky top-0 bg-white border-b border-gray-100 z-10">
-              <tr className="text-[11px] uppercase tracking-wide">
-                <th className="text-left pl-4 pr-2 py-3 font-medium text-gray-400">
+              <tr className="text-[10px] uppercase tracking-wide">
+                <th className="text-left pl-3 pr-3 py-2 font-medium text-gray-400">
                   Estación
                 </th>
-                {años.map((año, i) => (
-                  <th key={año} className={`text-right py-3 font-semibold text-blue-500 tabular-nums ${i === años.length - 1 ? 'pl-3 pr-4' : 'px-3'}`}>
+                {años.map(año => (
+                  <th key={año} className="whitespace-nowrap text-right py-2 px-2 font-semibold text-blue-500 tabular-nums">
                     {año}
                   </th>
                 ))}
+                <th className="w-3" />
               </tr>
             </thead>
             <tbody>
               {filas.map((f, i) => (
                 <tr key={i} className="border-b border-gray-50 hover:bg-blue-50/30 transition-colors">
-                  <td className="pl-4 pr-2 py-2.5">
-                    <span className="text-xs font-medium text-gray-800">{f.nombre}</span>
+                  <td className="pl-3 pr-3 py-1.5 font-medium text-gray-800 whitespace-nowrap">
+                    {f.nombre}
                   </td>
-                  {años.map((año, i) => (
-                    <td key={año} className={`py-2.5 text-right tabular-nums ${i === años.length - 1 ? 'pl-3 pr-4' : 'px-3'}`}>
+                  {años.map(año => (
+                    <td key={año} className="py-1.5 px-2 text-right tabular-nums whitespace-nowrap">
                       {f.valores[año] != null ? (
-                        <span className="text-xs font-semibold text-gray-700">
-                          {f.valores[año]}
-                        </span>
+                        <span className="font-semibold text-gray-700">{f.valores[año]}</span>
                       ) : (
-                        <span className="text-xs text-gray-300">—</span>
+                        <span className="text-gray-300">—</span>
                       )}
                     </td>
                   ))}
+                  <td />
                 </tr>
               ))}
             </tbody>
             <tfoot>
               <tr>
-                <td colSpan={años.length + 1} className="px-4 pt-2 pb-3 text-right">
-                  <span className="text-xs text-gray-400">mm · acumulado anual</span>
+                <td colSpan={años.length + 1} className="px-3 pt-1.5 pb-2 text-right">
+                  <span className="text-[10px] text-gray-400">mm · acumulado anual</span>
                 </td>
               </tr>
             </tfoot>
