@@ -45,5 +45,5 @@ export function useHistorialAnual(id: string, años: number[]) {
     )
   }, [todosLosRegistros, años, errorCarga])
 
-  return { resultados, cargando }
+  return { resultados, cargando, registrosCompletos: todosLosRegistros }
 }

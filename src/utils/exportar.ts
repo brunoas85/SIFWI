@@ -1,10 +1,11 @@
 import * as XLSX from 'xlsx'
 import type { RegistroHistorial } from '../types'
 import { f1, f2 } from './formato'
+import { formatearFecha } from './fecha'
 
 export function exportarExcel(datos: RegistroHistorial[], nombreArchivo: string) {
   const filas = datos.map(r => ({
-    'Fecha': r.Date,
+    'Fecha': formatearFecha(r.Date),
     'Hora': r.Hora,
     'Temp (°C)': f1(r.Temp),
     'HR (%)': f1(r.HR),

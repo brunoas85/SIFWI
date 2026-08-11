@@ -1,6 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import * as XLSX from 'xlsx'
 import { Cargando } from './Cargando'
+import { obtenerVistaDatosMeteor } from '../../api/fwi'
+import { normalizarNombre } from '../../utils/nombreEstacion'
 
 interface FilaEstacion {
   nombre: string
@@ -12,10 +14,18 @@ interface DatosTabla {
   filas: FilaEstacion[]
 }
 
+interface RegistroVivo {
+  nombre: string
+  acumulado: number
+}
+
 export function TablaPrecipitaciones() {
   const [datos, setDatos] = useState<DatosTabla | null>(null)
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [vivoPorEstacion, setVivoPorEstacion] = useState<Record<string, RegistroVivo>>({})
+
+  const añoActual = new Date().getFullYear()
 
   useEffect(() => {
     let cancelado = false
@@ -53,18 +63,53 @@ export function TablaPrecipitaciones() {
     return () => { cancelado = true }
   }, [])
 
-  const años = datos?.años ?? []
-  const filas = datos?.filas ?? []
+  // Precipitación acumulada del año en curso: se consulta en vivo para que se actualice día a día
+  useEffect(() => {
+    let cancelado = false
+    obtenerVistaDatosMeteor()
+      .then(res => {
+        if (cancelado) return
+        const mapa: Record<string, RegistroVivo> = {}
+        res.data.forEach(e => {
+          mapa[normalizarNombre(e.estacion)] = { nombre: e.estacion, acumulado: e.acumulado }
+        })
+        setVivoPorEstacion(mapa)
+      })
+      .catch(() => {})
+    return () => { cancelado = true }
+  }, [])
+
+  const años = useMemo(() => {
+    const base = datos?.años ?? []
+    return base.includes(añoActual) ? base : [...base, añoActual]
+  }, [datos, añoActual])
+
+  const filas = useMemo(() => {
+    const base = datos?.filas ?? []
+    const clavesBase = new Set(base.map(f => normalizarNombre(f.nombre)))
+
+    const actualizadas = base.map(f => {
+      const vivo = vivoPorEstacion[normalizarNombre(f.nombre)]
+      if (!vivo) return f
+      return { ...f, valores: { ...f.valores, [añoActual]: vivo.acumulado } }
+    })
+
+    const nuevas: FilaEstacion[] = Object.entries(vivoPorEstacion)
+      .filter(([clave]) => !clavesBase.has(clave))
+      .map(([, v]) => ({ nombre: v.nombre, valores: { [añoActual]: v.acumulado } }))
+
+    return [...actualizadas, ...nuevas]
+  }, [datos, vivoPorEstacion, añoActual])
 
   return (
     <div className="rounded-xl overflow-hidden border border-gray-200 shadow-sm bg-white flex flex-col">
-      <div className="px-4 py-1.5 border-b border-gray-100 bg-gradient-to-r from-blue-50 via-sky-50 to-cyan-50">
-        <p className="text-xs font-semibold text-blue-800 uppercase tracking-wide">
+      <div className="px-4 py-2 border-b border-gray-100 bg-gradient-to-r from-blue-50 via-sky-50 to-cyan-50">
+        <p className="text-sm font-semibold text-blue-800 uppercase tracking-wide">
           Precipitaciones anuales · Parque Nacional Lanín
         </p>
       </div>
 
-      <div className="flex-1 overflow-auto" style={{ maxHeight: 440 }}>
+      <div className="flex-1 overflow-auto" style={{ maxHeight: 480 }}>
         {cargando && <Cargando mensaje="Cargando..." />}
 
         {error && (
@@ -74,15 +119,21 @@ export function TablaPrecipitaciones() {
         )}
 
         {!cargando && !error && (
-          <table className="w-full text-xs">
+          <table className="w-full text-sm">
             <thead className="sticky top-0 bg-white border-b border-gray-100 z-10">
-              <tr className="text-[10px] uppercase tracking-wide">
-                <th className="text-left pl-3 pr-3 py-2 font-medium text-gray-400">
+              <tr className="text-xs uppercase tracking-wide">
+                <th className="text-left pl-4 pr-4 py-3 font-medium text-gray-400">
                   Estación
                 </th>
                 {años.map(año => (
-                  <th key={año} className="whitespace-nowrap text-right py-2 px-2 font-semibold text-blue-500 tabular-nums">
+                  <th key={año} className="whitespace-nowrap text-right py-3 px-3 font-semibold text-blue-500 tabular-nums">
                     {año}
+                    {año === añoActual && (
+                      <span
+                        title="Se actualiza día a día"
+                        className="inline-block w-2 h-2 rounded-full bg-emerald-500 ml-1.5 align-middle"
+                      />
+                    )}
                   </th>
                 ))}
                 <th className="w-3" />
@@ -91,11 +142,11 @@ export function TablaPrecipitaciones() {
             <tbody>
               {filas.map((f, i) => (
                 <tr key={i} className="border-b border-gray-50 hover:bg-blue-50/30 transition-colors">
-                  <td className="pl-3 pr-3 py-1.5 font-medium text-gray-800 whitespace-nowrap">
+                  <td className="pl-4 pr-4 py-2.5 font-medium text-gray-800 whitespace-nowrap">
                     {f.nombre}
                   </td>
                   {años.map(año => (
-                    <td key={año} className="py-1.5 px-2 text-right tabular-nums whitespace-nowrap">
+                    <td key={año} className="py-2.5 px-3 text-right tabular-nums whitespace-nowrap">
                       {f.valores[año] != null ? (
                         <span className="font-semibold text-gray-700">{f.valores[año]}</span>
                       ) : (
@@ -109,8 +160,8 @@ export function TablaPrecipitaciones() {
             </tbody>
             <tfoot>
               <tr>
-                <td colSpan={años.length + 1} className="px-3 pt-1.5 pb-2 text-right">
-                  <span className="text-[10px] text-gray-400">mm · acumulado anual</span>
+                <td colSpan={años.length + 1} className="px-4 pt-2 pb-2.5 text-right">
+                  <span className="text-xs text-gray-400">mm · acumulado anual</span>
                 </td>
               </tr>
             </tfoot>

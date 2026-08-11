@@ -22,6 +22,15 @@ function hace30DiasFormato() {
   return d.toISOString().slice(0, 10).replace(/-/g, '')
 }
 
+function aIso(fechaYYYYMMDD: string): string {
+  if (!/^\d{8}$/.test(fechaYYYYMMDD)) return ''
+  return `${fechaYYYYMMDD.slice(0, 4)}-${fechaYYYYMMDD.slice(4, 6)}-${fechaYYYYMMDD.slice(6, 8)}`
+}
+
+function deIso(fechaIso: string): string {
+  return fechaIso.replace(/-/g, '')
+}
+
 export function TablaHistorial({ id, nombre }: Props) {
   const [fechaInicio, setFechaInicio] = useState(hace30DiasFormato())
   const [fechaFin, setFechaFin] = useState(hoyFormato())
@@ -44,20 +53,20 @@ export function TablaHistorial({ id, nombre }: Props) {
       {/* Controles de búsqueda */}
       <div className="flex flex-wrap gap-3 items-end mb-5">
         <div>
-          <label className="text-xs text-gray-400 block mb-1">Desde (YYYYMMDD)</label>
+          <label className="text-xs text-gray-400 block mb-1">Desde</label>
           <input
-            type="text"
-            value={fechaInicio}
-            onChange={e => { setFechaInicio(e.target.value); setBuscar(false) }}
+            type="date"
+            value={aIso(fechaInicio)}
+            onChange={e => { setFechaInicio(deIso(e.target.value)); setBuscar(false) }}
             className="border border-gray-200 rounded-lg px-3 py-2 text-sm w-36 focus:outline-none focus:ring-2 focus:ring-blue-400"
           />
         </div>
         <div>
-          <label className="text-xs text-gray-400 block mb-1">Hasta (YYYYMMDD)</label>
+          <label className="text-xs text-gray-400 block mb-1">Hasta</label>
           <input
-            type="text"
-            value={fechaFin}
-            onChange={e => { setFechaFin(e.target.value); setBuscar(false) }}
+            type="date"
+            value={aIso(fechaFin)}
+            onChange={e => { setFechaFin(deIso(e.target.value)); setBuscar(false) }}
             className="border border-gray-200 rounded-lg px-3 py-2 text-sm w-36 focus:outline-none focus:ring-2 focus:ring-blue-400"
           />
         </div>

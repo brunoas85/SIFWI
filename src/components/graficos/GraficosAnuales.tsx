@@ -35,5 +35,12 @@ interface Props {
 }
 
 export function GraficosAnuales({ id }: Props) {
-  return <GraficosSeriesAnuales id={id} titulo="Análisis anual" graficos={GRAFICOS} />
+  return (
+    <GraficosSeriesAnuales
+      id={id}
+      titulo="Análisis anual"
+      graficos={GRAFICOS}
+      disposicion="horizontal"
+    />
+  )
 }

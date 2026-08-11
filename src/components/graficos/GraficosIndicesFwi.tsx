@@ -27,6 +27,7 @@ export function GraficosIndicesFwi({ id }: Props) {
       titulo="Evolución de índices FWI"
       graficos={GRAFICOS}
       homologarEscalas={false}
+      escalaFija
     />
   )
 }

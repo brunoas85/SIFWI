@@ -7,6 +7,7 @@ import type {
   VistaFwiItem,
   VistaMeteorItem,
   RespuestaLogin,
+  RespuestaClimaActualWu,
 } from '../types'
 import { CLAVE_TOKEN } from '../utils/sesion'
 
@@ -96,3 +97,8 @@ export const obtenerVistaDatosMeteor = () =>
   get<{ status: string; fecha_reporte: { fecha: string; hora: string }; data: VistaMeteorItem[] }>(
     '/vista_datos_meteorologicos'
   )
+
+// Consulta en vivo a Weather Underground: puede tardar unos segundos porque
+// el backend interroga la API externa en el momento (no es un reporte cacheado).
+export const obtenerClimaActualWu = () =>
+  get<RespuestaClimaActualWu>('/clima_actual_wu')

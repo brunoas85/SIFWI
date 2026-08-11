@@ -5,6 +5,7 @@ import { InsigniaFwi } from '../components/ui/InsigniaFwi'
 import { Cargando } from '../components/ui/Cargando'
 import { MensajeError } from '../components/ui/MensajeError'
 import { f1, f2 } from '../utils/formato'
+import { formatearFecha } from '../utils/fecha'
 import { obtenerEtiquetaFuente } from '../utils/fuente'
 
 type Formateador = (valor: string | number | undefined | null) => string
@@ -49,7 +50,7 @@ function FilaEstacion({ id, onQuitar }: { id: string; onQuitar: () => void }) {
       <td className="py-3 pr-4 pl-6 min-w-40">
         <div className="font-semibold text-gray-800 text-sm">{estacion.nombre}</div>
         <InsigniaFwi estado={estacion['Estado FWI']} tamaño="sm" />
-        <div className="text-xs text-gray-400 mt-1">{estacion.Date} · {estacion.Hora}</div>
+        <div className="text-xs text-gray-400 mt-1">{formatearFecha(estacion.Date)} · {estacion.Hora}</div>
         <button onClick={onQuitar} className="text-xs text-red-400 hover:underline mt-1">
           Quitar
         </button>

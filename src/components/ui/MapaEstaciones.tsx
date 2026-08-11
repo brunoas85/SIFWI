@@ -5,9 +5,9 @@ import 'leaflet/dist/leaflet.css'
 import { useNavigate } from 'react-router-dom'
 import { useEstaciones } from '../../hooks/useEstaciones'
 import { useConfigEstaciones } from '../../hooks/useConfigEstaciones'
-import { COORDENADAS_MOCK } from '../../api/coordenadasMock'
 import { InsigniaFwi } from './InsigniaFwi'
 import { Cargando } from './Cargando'
+import { formatearFecha } from '../../utils/fecha'
 import type { ResumenEstacion } from '../../types'
 
 interface Marcador {
@@ -16,7 +16,6 @@ interface Marcador {
   lat: number
   lng: number
   api: string
-  esMock: boolean
   resumen: ResumenEstacion | null
 }
 
@@ -27,6 +26,11 @@ const COLOR_ESTADO: Record<string, string> = {
   'MUY ALTO':'#dc2626',
   SEVERO:    '#991b1b',
   EXTREMO:   '#7c3aed',
+}
+
+function urlWunderground(idEstacion: string): string {
+  const hoy = new Date().toISOString().slice(0, 10)
+  return `https://www.wunderground.com/dashboard/pws/${idEstacion}/table/${hoy}/${hoy}/daily`
 }
 
 function crearIcono(estadoFwi: string, fwi: string): L.DivIcon {
@@ -56,24 +60,20 @@ export function MapaEstaciones() {
     return Object.entries(config)
       .filter(([, cfg]) => cfg.activa)
       .map(([id, cfg]): Marcador | null => {
-        const mock = COORDENADAS_MOCK[id]
-        const lat = cfg.latitud ? parseFloat(cfg.latitud) : mock?.lat
-        const lng = cfg.longitud ? parseFloat(cfg.longitud) : mock?.lng
-        if (lat === undefined || lng === undefined || isNaN(lat) || isNaN(lng)) return null
+        const lat = parseFloat(cfg.latitud)
+        const lng = parseFloat(cfg.longitud)
+        if (isNaN(lat) || isNaN(lng)) return null
         return {
           id,
           nombre: cfg.nombre,
           lat,
           lng,
           api: cfg.api,
-          esMock: !cfg.latitud || !cfg.longitud,
           resumen: estaciones.find(e => e.id === id) ?? null,
         }
       })
       .filter((m): m is Marcador => m !== null)
   }, [config, estaciones])
-
-  const hayMock = marcadores.some(m => m.esMock)
 
   const bounds = useMemo((): L.LatLngBoundsExpression | undefined => {
     if (marcadores.length === 0) return undefined
@@ -86,11 +86,6 @@ export function MapaEstaciones() {
         <p className="text-xs font-semibold text-emerald-800 uppercase tracking-wide">
           Mapa interactivo
         </p>
-        {hayMock && (
-          <span className="text-[10px] font-medium text-amber-700 bg-amber-100 border border-amber-200 rounded-full px-2 py-0.5 whitespace-nowrap">
-            Coordenadas de prueba
-          </span>
-        )}
       </div>
 
       {cargandoEst || cargandoCfg ? (
@@ -134,16 +129,28 @@ export function MapaEstaciones() {
                           <div>FWI: <span className="font-bold text-blue-700">{m.resumen.fwi}</span></div>
                           <div>Temp: {m.resumen.temperatura}°C · HR: {m.resumen.humedad}%</div>
                           <div>Viento: {m.resumen.viento} km/h</div>
-                          <div className="text-xs text-gray-400">{m.resumen.fecha} {m.resumen.hora}</div>
+                          <div className="text-xs text-gray-400">{formatearFecha(m.resumen.fecha)} {m.resumen.hora}</div>
                         </div>
                       </>
                     )}
-                    <button
-                      onClick={() => navigate(`/estacion/${m.id}`)}
-                      className="text-sm text-blue-600 hover:underline font-medium"
-                    >
-                      Ver detalle →
-                    </button>
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={() => navigate(`/estacion/${m.id}`)}
+                        className="text-sm text-blue-600 hover:underline font-medium"
+                      >
+                        Ver detalle →
+                      </button>
+                      {m.api?.toUpperCase() === 'WUNDERGROUND' && (
+                        <a
+                          href={urlWunderground(m.id)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm text-sky-600 hover:underline font-medium"
+                        >
+                          Wunderground ↗
+                        </a>
+                      )}
+                    </div>
                   </div>
                 </Popup>
               </Marker>

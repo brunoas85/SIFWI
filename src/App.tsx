@@ -7,6 +7,7 @@ import { Inicio } from './pages/Inicio'
 import { DetalleEstacion } from './pages/DetalleEstacion'
 import { IndicesFwiEstacion } from './pages/IndicesFwiEstacion'
 import { Comparar } from './pages/Comparar'
+import { VistaMeteorologica } from './pages/VistaMeteorologica'
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
               <Route path="estacion/:id" element={<DetalleEstacion />} />
               <Route path="estacion/:id/indices" element={<IndicesFwiEstacion />} />
               <Route path="comparar" element={<Comparar />} />
+              <Route path="variables-meteorologicas" element={<VistaMeteorologica />} />
             </Route>
           </Route>
         </Routes>

@@ -17,12 +17,12 @@ export function Encabezado() {
 
   return (
     <header className="bg-emerald-700 sticky top-0 z-10 shadow-lg">
-      <div className="px-4 sm:px-6 lg:px-10 py-[28px] sm:py-[33px] flex items-center justify-between gap-4">
+      <div className="px-4 sm:px-6 lg:px-10 py-2 sm:py-3 flex items-center justify-between gap-4">
         <NavLink to="/" className="flex items-center gap-4 sm:gap-5 shrink-0">
           <img
             src={`${import.meta.env.BASE_URL}logo_pnl.png`}
             alt="Logo Parque Nacional Lanín"
-            className="h-12 sm:h-14 w-auto object-contain shrink-0"
+            className="h-[98px] sm:h-[106px] w-[98px] sm:w-[106px] object-cover rounded-full shrink-0"
           />
           <div className="hidden md:block">
             <h1 className="text-xl sm:text-2xl font-bold text-white uppercase tracking-wide leading-tight">
@@ -36,7 +36,7 @@ export function Encabezado() {
           <img
             src={`${import.meta.env.BASE_URL}logo_ice.png`}
             alt="Logo ICE"
-            className="h-12 sm:h-14 w-auto object-contain shrink-0"
+            className="h-[98px] sm:h-[106px] w-[98px] sm:w-[106px] object-cover rounded-full shrink-0"
           />
         </NavLink>
 

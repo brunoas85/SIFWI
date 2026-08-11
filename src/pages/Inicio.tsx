@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { useEstaciones } from '../hooks/useEstaciones'
 import { useConfigEstaciones } from '../hooks/useConfigEstaciones'
 import { TarjetaEstacion } from '../components/ui/TarjetaEstacion'
@@ -15,11 +16,19 @@ export function Inicio() {
 
   return (
     <div>
-      <div className="mb-5">
-        <h2 className="text-xl font-bold text-gray-900">Estaciones meteorológicas</h2>
-        <p className="text-sm text-gray-500 mt-1">
-          {estaciones.length} estaciones · último registro disponible
-        </p>
+      <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 className="text-xl font-bold text-gray-900">Estaciones meteorológicas</h2>
+          <p className="text-sm text-gray-500 mt-1">
+            {estaciones.length} estaciones · último registro disponible
+          </p>
+        </div>
+        <Link
+          to="/variables-meteorologicas"
+          className="bg-blue-600 text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+        >
+          Ver variables meteorológicas →
+        </Link>
       </div>
 
       {estaciones.length === 0 ? (

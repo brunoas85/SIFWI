@@ -110,3 +110,23 @@ export interface VistaMeteorItem {
   fecha: string
   hora: string
 }
+
+export interface ClimaActualWuItem {
+  estacion: string
+  nombre: string
+  temperatura: number
+  humedad: number
+  velocidad_viento: number
+  precipitaciones_total: number
+  direccion_viento: string
+  latitud: number
+  mes: number
+}
+
+export interface RespuestaClimaActualWu {
+  status: string
+  timestamp: string
+  total: number
+  errores: string[]
+  data: ClimaActualWuItem[]
+}

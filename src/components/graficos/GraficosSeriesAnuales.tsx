@@ -29,15 +29,17 @@ interface Props {
   titulo: string
   graficos: ConfigGrafico[]
   homologarEscalas?: boolean
+  disposicion?: 'vertical' | 'horizontal'
+  escalaFija?: boolean
 }
 
-export function GraficosSeriesAnuales({ id, titulo, graficos, homologarEscalas = true }: Props) {
+export function GraficosSeriesAnuales({ id, titulo, graficos, homologarEscalas = true, disposicion = 'vertical', escalaFija = false }: Props) {
   const [añosSeleccionados, setAñosSeleccionados] = useState<number[]>([
     AÑO_ACTUAL - 1,
     AÑO_ACTUAL,
   ])
 
-  const { resultados, cargando } = useHistorialAnual(id, añosSeleccionados)
+  const { resultados, cargando, registrosCompletos } = useHistorialAnual(id, añosSeleccionados)
 
   const alternarAño = (año: number) => {
     setAñosSeleccionados(prev =>
@@ -108,6 +110,23 @@ export function GraficosSeriesAnuales({ id, titulo, graficos, homologarEscalas =
     return redondearMax(max)
   }, [datosGraficos, añosSeleccionados, homologarEscalas])
 
+  // Dominio fijo por gráfico calculado sobre TODO el historial (no solo los años tildados),
+  // para que la escala de cada índice no cambie al activar/desactivar años.
+  const dominiosFijosPorGrafico = useMemo(() => {
+    if (!escalaFija) return {}
+    const doms: Record<string, [number, number]> = {}
+    graficos.forEach(cfg => {
+      if (cfg.dominioFijo) return
+      let max = 0
+      registrosCompletos.forEach(r => {
+        const v = cfg.getter(r)
+        if (v !== null && v > max) max = v
+      })
+      doms[cfg.titulo] = [0, redondearMax(max)]
+    })
+    return doms
+  }, [escalaFija, graficos, registrosCompletos])
+
   // Botones de año reutilizables (se pasan al modal de cada gráfico)
   const botonesAño = (
     <>
@@ -165,7 +184,7 @@ export function GraficosSeriesAnuales({ id, titulo, graficos, homologarEscalas =
             Seleccioná al menos un año.
           </p>
         ) : (
-          <div className="space-y-5">
+          <div className={disposicion === 'horizontal' ? 'grid grid-cols-1 lg:grid-cols-3 gap-5' : 'space-y-5'}>
             {datosGraficos.map(g => (
               <div key={g.titulo}>
                 {g.tieneDatos ? (
@@ -176,7 +195,11 @@ export function GraficosSeriesAnuales({ id, titulo, graficos, homologarEscalas =
                     años={añosSeleccionados}
                     colores={COLORES}
                     esSuma={g.esSuma}
-                    dominio={homologarEscalas ? (g.dominioFijo ?? [0, maxComunResto]) : g.dominioFijo}
+                    dominio={
+                      escalaFija
+                        ? (g.dominioFijo ?? dominiosFijosPorGrafico[g.titulo])
+                        : homologarEscalas ? (g.dominioFijo ?? [0, maxComunResto]) : g.dominioFijo
+                    }
                     controles={botonesAño}
                   />
                 ) : (
