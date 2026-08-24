@@ -82,7 +82,7 @@ export function VistaMeteorologica() {
             <table className="w-full text-sm text-left whitespace-nowrap">
               <thead>
                 <tr className="border-b border-gray-200 text-xs text-gray-400 uppercase bg-gray-50">
-                  <th className="py-3 pl-5 pr-4">Estación</th>
+                  <th className="py-3 pl-5 pr-4 sticky left-0 z-20 bg-gray-50 border-r border-gray-200">Estación</th>
                   <th className="py-3 pr-4">Hora</th>
                   <th className="py-3 pr-4">Temp °C</th>
                   <th className="py-3 pr-4">HR %</th>
@@ -98,11 +98,11 @@ export function VistaMeteorologica() {
                   <tr
                     key={d?.estacion_id ?? nombre}
                     onClick={d ? () => navigate(`/estacion/${d.estacion_id}`) : undefined}
-                    className={`border-b border-gray-50 transition-colors ${
+                    className={`group border-b border-gray-50 transition-colors ${
                       d ? 'hover:bg-blue-50/30 cursor-pointer' : 'text-gray-300'
                     }`}
                   >
-                    <td className={`py-2.5 pl-5 pr-4 font-medium ${d ? 'text-gray-800' : 'text-gray-400'}`}>
+                    <td className={`py-2.5 pl-5 pr-4 font-medium sticky left-0 z-10 border-r border-gray-100 bg-white ${d ? 'text-gray-800 group-hover:bg-blue-50/30' : 'text-gray-400'}`}>
                       {nombre}
                     </td>
                     {d ? (
