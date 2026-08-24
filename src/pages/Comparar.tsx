@@ -47,7 +47,7 @@ function FilaEstacion({ id, onQuitar }: { id: string; onQuitar: () => void }) {
 
   return (
     <>
-      <td className="py-3 pr-4 pl-6 min-w-40">
+      <td className="py-3 pr-4 pl-6 min-w-40 sticky left-0 z-10 bg-white border-r border-gray-100">
         <div className="font-semibold text-gray-800 text-sm">{estacion.nombre}</div>
         <InsigniaFwi estado={estacion['Estado FWI']} tamaño="sm" />
         <div className="text-xs text-gray-400 mt-1">{formatearFecha(estacion.Date)} · {estacion.Hora}</div>
@@ -89,63 +89,65 @@ export function Comparar() {
         </p>
       </div>
 
-      <div className="mb-6">
-        <p className="text-xs text-gray-400 mb-3 uppercase tracking-wide">Agregar estación</p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {estaciones.map((est) => {
-            const seleccionada = seleccionadas.includes(est.id)
-            return (
-              <button
-                key={est.id}
-                onClick={() => agregar(est.id)}
-                disabled={seleccionada}
-                className={`relative overflow-hidden text-left bg-white rounded-xl border border-gray-200 pl-5 p-4 transition-all focus:outline-none focus:ring-2 focus:ring-emerald-400 ${
-                  seleccionada
-                    ? 'opacity-40 cursor-not-allowed'
-                    : 'cursor-pointer hover:shadow-md hover:border-emerald-300'
-                }`}
-              >
-                <span className="absolute left-0 top-0 h-full w-1.5 bg-gradient-to-b from-emerald-500 via-amber-500 to-red-500" />
-                <span className="absolute -right-1 -top-2 text-2xl font-black text-gray-100 select-none pointer-events-none tracking-tight whitespace-nowrap">
-                  {obtenerEtiquetaFuente(est.api)}
-                </span>
-                <h3 className="relative font-semibold text-gray-900 text-base leading-tight truncate pr-4">
-                  {est.nombre}
-                </h3>
-                <p className="relative text-xs text-gray-400 mt-0.5">{est.id}</p>
-              </button>
-            )
-          })}
+      <div className="flex flex-col">
+        <div className="order-2 lg:order-1 mb-6">
+          <p className="text-xs text-gray-400 mb-3 uppercase tracking-wide">Agregar estación</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {estaciones.map((est) => {
+              const seleccionada = seleccionadas.includes(est.id)
+              return (
+                <button
+                  key={est.id}
+                  onClick={() => agregar(est.id)}
+                  disabled={seleccionada}
+                  className={`relative overflow-hidden text-left bg-white rounded-xl border border-gray-200 pl-5 p-4 transition-all focus:outline-none focus:ring-2 focus:ring-emerald-400 ${
+                    seleccionada
+                      ? 'opacity-40 cursor-not-allowed'
+                      : 'cursor-pointer hover:shadow-md hover:border-emerald-300'
+                  }`}
+                >
+                  <span className="absolute left-0 top-0 h-full w-1.5 bg-gradient-to-b from-emerald-500 via-amber-500 to-red-500" />
+                  <span className="absolute -right-1 -top-2 text-2xl font-black text-gray-100 select-none pointer-events-none tracking-tight whitespace-nowrap">
+                    {obtenerEtiquetaFuente(est.api)}
+                  </span>
+                  <h3 className="relative font-semibold text-gray-900 text-base leading-tight truncate pr-4">
+                    {est.nombre}
+                  </h3>
+                  <p className="relative text-xs text-gray-400 mt-0.5">{est.id}</p>
+                </button>
+              )
+            })}
+          </div>
         </div>
-      </div>
 
-      {seleccionadas.length === 0 ? (
-        <p className="text-gray-400 text-center py-16">
-          Seleccioná al menos una estación para comparar.
-        </p>
-      ) : (
-        <div className="bg-white rounded-xl border border-gray-200 overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-gray-100 text-xs text-gray-400 uppercase">
-                <th className="py-3 pr-4 pl-6 text-left">Estación</th>
-                {CAMPOS.map(({ etiqueta }) => (
-                  <th key={etiqueta} className="py-3 pr-6 text-left">
-                    {etiqueta}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {seleccionadas.map((id) => (
-                <tr key={id} className="border-b border-gray-50">
-                  <FilaEstacion id={id} onQuitar={() => quitar(id)} />
+        {seleccionadas.length === 0 ? (
+          <p className="order-1 lg:order-2 text-gray-400 text-center py-16">
+            Seleccioná al menos una estación para comparar.
+          </p>
+        ) : (
+          <div className="order-1 lg:order-2 mb-6 lg:mb-0 bg-white rounded-xl border border-gray-200 overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-gray-100 text-xs text-gray-400 uppercase">
+                  <th className="py-3 pr-4 pl-6 text-left sticky left-0 z-20 bg-white border-r border-gray-100">Estación</th>
+                  {CAMPOS.map(({ etiqueta }) => (
+                    <th key={etiqueta} className="py-3 pr-6 text-left">
+                      {etiqueta}
+                    </th>
+                  ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+              </thead>
+              <tbody>
+                {seleccionadas.map((id) => (
+                  <tr key={id} className="border-b border-gray-50">
+                    <FilaEstacion id={id} onQuitar={() => quitar(id)} />
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </div>
   )
 }
