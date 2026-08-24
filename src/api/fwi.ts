@@ -8,6 +8,7 @@ import type {
   VistaMeteorItem,
   RespuestaLogin,
   RespuestaClimaActualWu,
+  RespuestaClimaActualSmn,
 } from '../types'
 import { CLAVE_TOKEN } from '../utils/sesion'
 
@@ -102,3 +103,7 @@ export const obtenerVistaDatosMeteor = () =>
 // el backend interroga la API externa en el momento (no es un reporte cacheado).
 export const obtenerClimaActualWu = () =>
   get<RespuestaClimaActualWu>('/clima_actual_wu')
+
+// Consulta en vivo al SMN (Chapelco y Bariloche), análoga a obtenerClimaActualWu.
+export const obtenerClimaActualSmn = () =>
+  get<RespuestaClimaActualSmn>('/clima_actual_smn')

@@ -130,3 +130,21 @@ export interface RespuestaClimaActualWu {
   errores: string[]
   data: ClimaActualWuItem[]
 }
+
+export interface ClimaActualSmnItem {
+  estacion: string
+  nombre: string
+  temperatura: number
+  humedad: number
+  velocidad_viento: number
+  precipitaciones_total: number
+  direccion_viento: string
+}
+
+export interface RespuestaClimaActualSmn {
+  status: string
+  timestamp: string
+  total: number
+  errores: string[]
+  data: ClimaActualSmnItem[]
+}
