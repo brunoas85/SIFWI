@@ -132,13 +132,18 @@ export interface RespuestaClimaActualWu {
 }
 
 export interface ClimaActualSmnItem {
-  estacion: string
+  id: string
   nombre: string
+  fecha: string
+  hora: string
   temperatura: number
-  humedad: number
-  velocidad_viento: number
-  precipitaciones_total: number
-  direccion_viento: string
+  humedad_relativa: number
+  viento_intensidad: number
+  viento_direccion: string
+  estado_nuboso: string
+  presion_superficie: number
+  sensacion_termica: number | null
+  visibilidad: string
 }
 
 export interface RespuestaClimaActualSmn {
@@ -146,5 +151,6 @@ export interface RespuestaClimaActualSmn {
   timestamp: string
   total: number
   errores: string[]
+  actualizado_ahora: boolean
   data: ClimaActualSmnItem[]
 }

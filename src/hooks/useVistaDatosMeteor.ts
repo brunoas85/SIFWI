@@ -1,14 +1,16 @@
 import { useState, useEffect, useCallback } from 'react'
 import { obtenerVistaDatosMeteor, obtenerClimaActualWu, obtenerClimaActualSmn } from '../api/fwi'
-import type { VistaMeteorItem, ClimaActualWuItem, ClimaActualSmnItem } from '../types'
+import type { VistaMeteorItem } from '../types'
 
 // Únicas estaciones SMN activas: Chapelco y Bariloche.
 const IDS_SMN = new Set(['87761', '87765'])
 
-type ValorVivo = Pick<
-  ClimaActualWuItem | ClimaActualSmnItem,
-  'temperatura' | 'humedad' | 'velocidad_viento' | 'direccion_viento'
->
+interface ValorVivo {
+  temperatura: number
+  humedad: number
+  viento_kmh: number
+  direccion: string
+}
 
 export function useVistaDatosMeteor() {
   const [datos, setDatos] = useState<VistaMeteorItem[]>([])
@@ -29,9 +31,23 @@ export function useVistaDatosMeteor() {
         // con los valores en vivo de WU y SMN, consultados a cada API externa en este momento.
         const ahora = new Date()
         const horaAhora = ahora.toTimeString().slice(0, 5)
-        const vivoPorId = new Map<string, ValorVivo>((vivoWu?.data ?? []).map(v => [v.estacion, v]))
+        const vivoPorId = new Map<string, ValorVivo>()
+        for (const v of vivoWu?.data ?? []) {
+          vivoPorId.set(v.estacion, {
+            temperatura: v.temperatura,
+            humedad: v.humedad,
+            viento_kmh: v.velocidad_viento,
+            direccion: v.direccion_viento,
+          })
+        }
         for (const v of vivoSmn?.data ?? []) {
-          if (IDS_SMN.has(v.estacion)) vivoPorId.set(v.estacion, v)
+          if (!IDS_SMN.has(v.id)) continue
+          vivoPorId.set(v.id, {
+            temperatura: v.temperatura,
+            humedad: v.humedad_relativa,
+            viento_kmh: v.viento_intensidad,
+            direccion: v.viento_direccion,
+          })
         }
         const combinados = reporte.data.map(d => {
           const v = vivoPorId.get(d.estacion_id)
@@ -40,8 +56,8 @@ export function useVistaDatosMeteor() {
             ...d,
             temperatura: v.temperatura,
             humedad: v.humedad,
-            viento_kmh: v.velocidad_viento,
-            direccion: v.direccion_viento,
+            viento_kmh: v.viento_kmh,
+            direccion: v.direccion,
             hora: horaAhora,
           }
         })
