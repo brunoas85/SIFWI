@@ -44,6 +44,7 @@ export function TablaPrecipitaciones() {
         // Filas 2+: [nombre, val1, val2, ...]
         const filas: FilaEstacion[] = rows.slice(2)
           .filter(row => row[0])
+          .filter(row => normalizarNombre(String(row[0])) !== 'meliquina')
           .map(row => {
             const nombre = String(row[0])
             const valores: Record<number, number> = {}

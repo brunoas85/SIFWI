@@ -27,6 +27,7 @@ export function useOrdenEstacionesPnl(): EstacionOrden[] {
             const nombre = String(row[0])
             return { nombre, normalizado: normalizarNombre(nombre) }
           })
+          .filter(o => o.normalizado !== 'meliquina')
         setOrden(nombres)
       })
       .catch(() => {})

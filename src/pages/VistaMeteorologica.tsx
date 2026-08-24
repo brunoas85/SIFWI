@@ -24,8 +24,8 @@ export function VistaMeteorologica() {
   const orden = useOrdenEstacionesPnl()
 
   // Mismo orden y mismas estaciones que la tabla de Precipitaciones anuales · Parque
-  // Nacional Lanín: las que figuran en el Excel pero no tienen datos en vivo (ej.
-  // Meliquina, sin estación configurada en el backend) igual aparecen, sin valores.
+  // Nacional Lanín: las que figuran en el Excel pero no tienen datos en vivo
+  // igual aparecen, sin valores.
   const filas = useMemo((): FilaEstacion[] => {
     if (orden.length === 0) return datos.map(d => ({ nombre: d.estacion, dato: d }))
 
