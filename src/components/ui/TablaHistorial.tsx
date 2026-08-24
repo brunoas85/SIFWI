@@ -111,7 +111,7 @@ export function TablaHistorial({ id, nombre }: Props) {
             <table className="w-full text-sm text-left whitespace-nowrap">
               <thead>
                 <tr className="border-b border-gray-200 text-xs text-gray-400 uppercase">
-                  <th className="pb-2 pr-4">Fecha</th>
+                  <th className="pb-2 pr-4 sticky left-0 z-20 bg-white border-r border-gray-100">Fecha</th>
                   <th className="pb-2 pr-4">Hora</th>
                   <th className="pb-2 pr-4">Temp °C</th>
                   <th className="pb-2 pr-4">HR %</th>
@@ -129,8 +129,8 @@ export function TablaHistorial({ id, nombre }: Props) {
               </thead>
               <tbody>
                 {datos.map((r, i) => (
-                  <tr key={i} className="border-b border-gray-50 hover:bg-gray-50">
-                    <td className="py-2 pr-4 text-gray-500">{formatearFecha(r.Date)}</td>
+                  <tr key={i} className="group border-b border-gray-50 hover:bg-gray-50">
+                    <td className="py-2 pr-4 text-gray-500 sticky left-0 z-10 bg-white border-r border-gray-100 group-hover:bg-gray-50">{formatearFecha(r.Date)}</td>
                     <td className="py-2 pr-4 text-gray-500">{r.Hora}</td>
                     <td className="py-2 pr-4">{f1(r.Temp)}</td>
                     <td className="py-2 pr-4">{f1(r.HR)}</td>
