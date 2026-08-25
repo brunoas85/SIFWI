@@ -19,6 +19,17 @@ interface RegistroVivo {
   acumulado: number
 }
 
+// Estaciones con datos de fuente SMN (además de Chapelco, que ya trae el
+// sufijo en el Excel): se agrega la marca para que quede igual de clara.
+const ESTACIONES_SMN = ['bariloche']
+
+function agregarSufijoSmn(nombre: string): string {
+  if (ESTACIONES_SMN.includes(normalizarNombre(nombre)) && !/smn/i.test(nombre)) {
+    return `${nombre} (SMN)`
+  }
+  return nombre
+}
+
 export function TablaPrecipitaciones() {
   const [datos, setDatos] = useState<DatosTabla | null>(null)
   const [cargando, setCargando] = useState(true)
@@ -46,7 +57,7 @@ export function TablaPrecipitaciones() {
           .filter(row => row[0])
           .filter(row => normalizarNombre(String(row[0])) !== 'meliquina')
           .map(row => {
-            const nombre = String(row[0])
+            const nombre = agregarSufijoSmn(String(row[0]))
             const valores: Record<number, number> = {}
             años.forEach((año, i) => {
               const v = row[i + 1]
@@ -97,75 +108,65 @@ export function TablaPrecipitaciones() {
 
     const nuevas: FilaEstacion[] = Object.entries(vivoPorEstacion)
       .filter(([clave]) => !clavesBase.has(clave))
-      .map(([, v]) => ({ nombre: v.nombre, valores: { [añoActual]: v.acumulado } }))
+      .map(([, v]) => ({ nombre: agregarSufijoSmn(v.nombre), valores: { [añoActual]: v.acumulado } }))
 
     return [...actualizadas, ...nuevas]
   }, [datos, vivoPorEstacion, añoActual])
 
   return (
-    <div className="rounded-xl overflow-hidden border border-gray-200 shadow-sm bg-white flex flex-col">
-      <div className="px-4 py-2 border-b border-gray-100 bg-gradient-to-r from-blue-50 via-sky-50 to-cyan-50">
-        <p className="text-sm font-semibold text-blue-800 uppercase tracking-wide">
-          Precipitaciones anuales · Parque Nacional Lanín
-        </p>
-      </div>
+    <div className="flex flex-col h-full">
+      <h2 className="font-heading font-extrabold text-lg tracking-[-0.01em] mb-1">
+        Precipitación anual <span className="font-body font-normal text-[13px]" style={{ color: 'var(--color-neutral-700)' }}>mm acumulados</span>
+      </h2>
 
-      <div className="flex-1 overflow-auto" style={{ maxHeight: 480 }}>
+      <div className="flex-1 overflow-auto border-2 border-(--color-divider) mt-3" style={{ maxHeight: 472 }}>
         {cargando && <Cargando mensaje="Cargando..." />}
 
         {error && (
           <div className="flex items-center justify-center h-full">
-            <p className="text-sm text-gray-400 text-center px-6">{error}</p>
+            <p className="text-sm text-center px-6" style={{ color: 'var(--color-neutral-500)' }}>{error}</p>
           </div>
         )}
 
         {!cargando && !error && (
-          <table className="w-full text-sm">
-            <thead className="sticky top-0 bg-white border-b border-gray-100 z-10">
-              <tr className="text-xs uppercase tracking-wide">
-                <th className="text-left pl-4 pr-4 py-3 font-medium text-gray-400">
+          <table className="table">
+            <thead>
+              <tr>
+                <th className="text-left sticky top-0 z-[2]" style={{ background: 'var(--color-surface)' }}>
                   Estación
                 </th>
                 {años.map(año => (
-                  <th key={año} className="whitespace-nowrap text-right py-3 px-3 font-semibold text-blue-500 tabular-nums">
+                  <th key={año} className="text-right sticky top-0 z-[2] tabular-nums" style={{ background: 'var(--color-surface)' }}>
                     {año}
                     {año === añoActual && (
                       <span
                         title="Se actualiza día a día"
-                        className="inline-block w-2 h-2 rounded-full bg-emerald-500 ml-1.5 align-middle"
+                        className="inline-block w-1.5 h-1.5 ml-1.5 align-middle"
+                        style={{ background: 'var(--color-accent)' }}
                       />
                     )}
                   </th>
                 ))}
-                <th className="w-3" />
               </tr>
             </thead>
             <tbody>
               {filas.map((f, i) => (
-                <tr key={i} className="border-b border-gray-50 hover:bg-blue-50/30 transition-colors">
-                  <td className="pl-4 pr-4 py-2.5 font-medium text-gray-800 whitespace-nowrap">
+                <tr key={i}>
+                  <td className="whitespace-nowrap font-medium">
                     {f.nombre}
                   </td>
                   {años.map(año => (
-                    <td key={año} className="py-2.5 px-3 text-right tabular-nums whitespace-nowrap">
+                    <td key={año} className="text-right tabular-nums whitespace-nowrap">
                       {f.valores[año] != null ? (
-                        <span className="font-semibold text-gray-700">{f.valores[año]}</span>
+                        f.valores[año]
                       ) : (
-                        <span className="text-gray-300">—</span>
+                        <span style={{ color: 'var(--color-neutral-400)' }}>—</span>
                       )}
                     </td>
                   ))}
-                  <td />
                 </tr>
               ))}
             </tbody>
-            <tfoot>
-              <tr>
-                <td colSpan={años.length + 1} className="px-4 pt-2 pb-2.5 text-right">
-                  <span className="text-xs text-gray-400">mm · acumulado anual</span>
-                </td>
-              </tr>
-            </tfoot>
           </table>
         )}
       </div>

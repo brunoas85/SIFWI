@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import type { ResumenEstacion } from '../../types'
-import { obtenerEtiquetaFuente } from '../../utils/fuente'
+import { obtenerConfigEstado } from '../../utils/fwi'
+import { f1 } from '../../utils/formato'
 
 interface Props {
   estacion: ResumenEstacion
@@ -9,33 +10,34 @@ interface Props {
 
 export function TarjetaEstacion({ estacion, altitud }: Props) {
   const navigate = useNavigate()
-  const fuente = obtenerEtiquetaFuente(estacion.api)
+  const config = obtenerConfigEstado(estacion.estado_fwi)
 
   return (
-    <div
-      role="button"
-      tabIndex={0}
+    <button
       onClick={() => navigate(`/estacion/${estacion.id}`)}
-      onKeyDown={(e) => e.key === 'Enter' && navigate(`/estacion/${estacion.id}`)}
-      className="relative overflow-hidden bg-white rounded-xl border border-gray-200 pl-5 p-4 cursor-pointer hover:shadow-md hover:border-emerald-300 transition-all focus:outline-none focus:ring-2 focus:ring-emerald-400"
+      className="text-left border-0 cursor-pointer w-full px-4.5 pt-4 pb-4.5"
+      style={{
+        background: 'var(--color-bg)',
+        borderTop: `4px solid ${config.tono}`,
+        borderRight: '1px solid var(--color-divider)',
+        borderBottom: '1px solid var(--color-divider)',
+      }}
     >
-      <span className="absolute left-0 top-0 h-full w-1.5 bg-gradient-to-b from-emerald-500 via-amber-500 to-red-500" />
-
-      {/* Fuente de datos como marca de agua de fondo */}
-      <span className="absolute -right-1 -top-2 text-2xl font-black text-gray-100 select-none pointer-events-none tracking-tight whitespace-nowrap">
-        {fuente}
+      <span className="flex items-baseline justify-between gap-3">
+        <span className="text-[11px] font-semibold tracking-[0.12em] uppercase" style={{ color: 'var(--color-neutral-700)' }}>
+          {config.etiqueta}
+        </span>
+        <span className="text-[11px]" style={{ color: 'var(--color-neutral-600)' }}>{estacion.api}</span>
       </span>
-
-      <h2 className="relative font-semibold text-gray-900 text-base leading-tight truncate pr-4">
+      <span className="block mt-2.5 font-heading font-extrabold text-xl leading-tight tracking-[-0.015em] overflow-hidden text-ellipsis whitespace-nowrap">
         {estacion.nombre}
-      </h2>
-      <p className="relative text-xs text-gray-400 mt-0.5">{estacion.id}</p>
-
-      {altitud && (
-        <p className="relative text-xs text-gray-400 mt-2">
-          {altitud} m s.n.m.
-        </p>
-      )}
-    </div>
+      </span>
+      <span className="flex items-end justify-between mt-3">
+        <span className="text-xs tabular-nums" style={{ color: 'var(--color-neutral-700)' }}>
+          {altitud ? `${altitud} m · ` : ''}{estacion.id}
+        </span>
+        <span className="font-heading font-extrabold text-3xl leading-none tabular-nums">{f1(estacion.fwi)}</span>
+      </span>
+    </button>
   )
 }

@@ -6,17 +6,19 @@ interface Props {
 }
 
 const TAMAÑOS = {
-  sm: 'text-xs px-2 py-0.5',
-  md: 'text-sm px-2.5 py-1',
-  lg: 'text-base px-3 py-1.5',
+  sm: { swatch: 8, texto: 'text-[11px]' },
+  md: { swatch: 10, texto: 'text-xs' },
+  lg: { swatch: 12, texto: 'text-sm' },
 }
 
 export function InsigniaFwi({ estado, tamaño = 'md' }: Props) {
   const config = obtenerConfigEstado(estado)
+  const t = TAMAÑOS[tamaño]
   return (
-    <span
-      className={`inline-flex items-center font-semibold rounded-full border whitespace-nowrap ${config.clases} ${TAMAÑOS[tamaño]}`}
-    >
+    <span className={`inline-flex items-center gap-1.5 font-semibold uppercase tracking-wide whitespace-nowrap ${t.texto}`}>
+      <span
+        style={{ width: t.swatch, height: t.swatch, background: config.tono, border: '1px solid var(--color-text)' }}
+      />
       {config.etiqueta}
     </span>
   )

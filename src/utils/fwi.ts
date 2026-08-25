@@ -1,19 +1,21 @@
 interface ConfigEstado {
-  clases: string
+  tono: string
+  texto: string
   etiqueta: string
 }
 
 const CONFIG_ESTADO_FWI: Record<string, ConfigEstado> = {
-  BAJO:      { clases: 'bg-green-100 text-green-800 border-green-200',   etiqueta: 'Bajo' },
-  MODERADO:  { clases: 'bg-yellow-100 text-yellow-800 border-yellow-200', etiqueta: 'Moderado' },
-  ALTO:      { clases: 'bg-orange-100 text-orange-800 border-orange-200', etiqueta: 'Alto' },
-  'MUY ALTO':{ clases: 'bg-red-100 text-red-800 border-red-200',          etiqueta: 'Muy Alto' },
-  SEVERO:    { clases: 'bg-red-200 text-red-900 border-red-300',          etiqueta: 'Severo' },
-  EXTREMO:   { clases: 'bg-purple-200 text-purple-900 border-purple-300', etiqueta: 'Extremo' },
+  BAJO:      { tono: '#3f8f4a', texto: '#fff', etiqueta: 'Bajo' },
+  MODERADO:  { tono: '#d6a800', texto: '#201e1d', etiqueta: 'Moderado' },
+  ALTO:      { tono: '#e2740b', texto: '#fff', etiqueta: 'Alto' },
+  'MUY ALTO':{ tono: '#ec3013', texto: '#fff', etiqueta: 'Muy Alto' },
+  SEVERO:    { tono: '#9e1c0a', texto: '#fff', etiqueta: 'Severo' },
+  EXTREMO:   { tono: '#4d170e', texto: '#fff', etiqueta: 'Extremo' },
 }
 
 const DEFAULT_CONFIG: ConfigEstado = {
-  clases: 'bg-gray-100 text-gray-600 border-gray-200',
+  tono: '#9b9797',
+  texto: '#fff',
   etiqueta: 'Sin datos',
 }
 

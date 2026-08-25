@@ -50,47 +50,42 @@ export function VistaMeteorologica() {
 
   return (
     <div>
-      <button
-        onClick={() => navigate(-1)}
-        className="text-sm text-blue-600 hover:underline mb-5 block"
-      >
+      <button onClick={() => navigate(-1)} className="btn btn-ghost text-sm mb-4">
         ← Volver
       </button>
 
-      <div className="flex flex-wrap items-center gap-3 mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Variables meteorológicas</h1>
+      <header className="flex flex-wrap items-baseline gap-3 pb-4 mb-6 border-b-2 border-(--color-divider)">
+        <h1 className="font-heading font-extrabold text-3xl tracking-[-0.02em]">Ver variables meteorológicas actuales</h1>
         <div className="flex items-center gap-3 ml-auto">
           {actualizadoEn && (
-            <span className="text-xs text-gray-400">
+            <span className="text-xs" style={{ color: 'var(--color-neutral-600)' }}>
               Actualizado {formatearFecha(actualizadoEn.toISOString().slice(0, 10))} · {horaLocal(actualizadoEn)}
             </span>
           )}
-          <button
-            onClick={recargar}
-            className="text-sm text-blue-600 hover:underline font-medium"
-          >
+          <button onClick={recargar} className="btn btn-ghost text-sm">
             ↻ Actualizar
           </button>
         </div>
-      </div>
+      </header>
 
       {filas.length === 0 ? (
-        <p className="text-gray-400 text-center py-16">No hay datos disponibles.</p>
+        <p className="text-center py-16" style={{ color: 'var(--color-neutral-500)' }}>No hay datos disponibles.</p>
       ) : (
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left whitespace-nowrap">
+        <>
+          <div className="overflow-x-auto border-2 border-(--color-divider)">
+            <table className="table" style={{ whiteSpace: 'nowrap' }}>
               <thead>
-                <tr className="border-b border-gray-200 text-xs text-gray-400 uppercase bg-gray-50">
-                  <th className="py-3 pl-5 pr-4 sticky left-0 z-20 bg-gray-50 border-r border-gray-200">Estación</th>
-                  <th className="py-3 pr-4">Hora</th>
-                  <th className="py-3 pr-4">Temp °C</th>
-                  <th className="py-3 pr-4">HR %</th>
-                  <th className="py-3 pr-4">Viento km/h</th>
-                  <th className="py-3 pr-4">Viento 10m</th>
-                  <th className="py-3 pr-4">Dirección</th>
-                  <th className="py-3 pr-4">Lluvia ayer mm</th>
-                  <th className="py-3 pr-5">Acumulado mm</th>
+                <tr>
+                  <th className="text-center align-middle sticky left-0 z-20 border-r border-(--color-divider)" style={{ background: 'var(--color-surface)' }}>
+                    Estación
+                  </th>
+                  <th className="text-center align-middle">Hora</th>
+                  <th className="text-center align-middle">Temp °C</th>
+                  <th className="text-center align-middle">HR %</th>
+                  <th className="text-center align-middle">Viento km/h</th>
+                  <th className="text-center align-middle">Viento 10 m</th>
+                  <th className="text-center align-middle">Dirección</th>
+                  <th className="text-center align-middle">Lluvia ayer mm</th>
                 </tr>
               </thead>
               <tbody>
@@ -98,34 +93,36 @@ export function VistaMeteorologica() {
                   <tr
                     key={d?.estacion_id ?? nombre}
                     onClick={d ? () => navigate(`/estacion/${d.estacion_id}`) : undefined}
-                    className={`group border-b border-gray-50 transition-colors ${
-                      d ? 'hover:bg-blue-50/30 cursor-pointer' : 'text-gray-300'
-                    }`}
+                    style={{ cursor: d ? 'pointer' : undefined, color: d ? undefined : 'var(--color-neutral-400)' }}
                   >
-                    <td className={`py-2.5 pl-5 pr-4 font-medium sticky left-0 z-10 border-r border-gray-100 bg-white ${d ? 'text-gray-800 group-hover:bg-blue-50/30' : 'text-gray-400'}`}>
+                    <td
+                      className="font-medium text-center align-middle sticky left-0 z-10 border-r border-(--color-divider)"
+                      style={{ background: 'var(--color-bg)', color: d ? undefined : 'var(--color-neutral-400)' }}
+                    >
                       {nombre}
                     </td>
                     {d ? (
                       <>
-                        <td className="py-2.5 pr-4 text-gray-500">{d.hora}</td>
-                        <td className="py-2.5 pr-4">{f1(d.temperatura)}</td>
-                        <td className="py-2.5 pr-4">{f1(d.humedad)}</td>
-                        <td className="py-2.5 pr-4">{f1(d.viento_kmh)}</td>
-                        <td className="py-2.5 pr-4">{f1(d.viento_10m)}</td>
-                        <td className="py-2.5 pr-4">{d.direccion}</td>
-                        <td className="py-2.5 pr-4">{f2(d.lluvia_ayer)}</td>
-                        <td className="py-2.5 pr-5">{f2(d.acumulado)}</td>
+                        <td className="text-center align-middle" style={{ color: 'var(--color-neutral-700)' }}>{d.hora}</td>
+                        <td className="text-center align-middle tabular-nums">{f1(d.temperatura)}</td>
+                        <td className="text-center align-middle tabular-nums">{f1(d.humedad)}</td>
+                        <td className="text-center align-middle tabular-nums">{f1(d.viento_kmh)}</td>
+                        <td className="text-center align-middle tabular-nums">{f1(d.viento_10m)}</td>
+                        <td className="text-center align-middle">{d.direccion}</td>
+                        <td className="text-center align-middle tabular-nums">{f2(d.lluvia_ayer)}</td>
                       </>
                     ) : (
-                      <td colSpan={8} className="py-2.5 pr-5 text-xs">Sin estación configurada en el backend</td>
+                      <td colSpan={7} className="text-center align-middle text-xs">Sin estación configurada en el backend</td>
                     )}
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-          <p className="text-xs text-gray-400 px-5 py-3">{filas.length} estaciones</p>
-        </div>
+          <p className="text-[11px] tracking-[0.1em] uppercase mt-3" style={{ color: 'var(--color-neutral-700)' }}>
+            {filas.length} estaciones
+          </p>
+        </>
       )}
     </div>
   )

@@ -6,7 +6,7 @@ import { Cargando } from '../components/ui/Cargando'
 import { MensajeError } from '../components/ui/MensajeError'
 import { f1, f2 } from '../utils/formato'
 import { formatearFecha } from '../utils/fecha'
-import { obtenerEtiquetaFuente } from '../utils/fuente'
+import { obtenerConfigEstado } from '../utils/fwi'
 
 type Formateador = (valor: string | number | undefined | null) => string
 
@@ -18,15 +18,15 @@ interface CampoComparar {
 }
 
 const CAMPOS: CampoComparar[] = [
-  { etiqueta: 'Temperatura', clave: 'Temp', unidad: '°C' },
-  { etiqueta: 'Humedad', clave: 'HR', unidad: '%' },
-  { etiqueta: 'Viento', clave: 'WS', unidad: 'km/h' },
+  { etiqueta: 'Temperatura', clave: 'Temp', unidad: '°C', formato: f2 },
+  { etiqueta: 'Humedad', clave: 'HR', unidad: '%', formato: f2 },
+  { etiqueta: 'Viento', clave: 'WS', unidad: 'km/h', formato: f2 },
   { etiqueta: 'Precipitaciones', clave: 'PPT', unidad: 'mm', formato: f2 },
-  { etiqueta: 'FFMC', clave: 'FFMC', unidad: '' },
-  { etiqueta: 'DMC', clave: 'DMC', unidad: '' },
-  { etiqueta: 'DC', clave: 'DC', unidad: '' },
-  { etiqueta: 'ISI', clave: 'ISI', unidad: '' },
-  { etiqueta: 'BUI', clave: 'BUI', unidad: '' },
+  { etiqueta: 'FFMC', clave: 'FFMC', unidad: '', formato: f2 },
+  { etiqueta: 'DMC', clave: 'DMC', unidad: '', formato: f2 },
+  { etiqueta: 'DC', clave: 'DC', unidad: '', formato: f2 },
+  { etiqueta: 'ISI', clave: 'ISI', unidad: '', formato: f2 },
+  { etiqueta: 'BUI', clave: 'BUI', unidad: '', formato: f2 },
   { etiqueta: 'FWI', clave: 'FWI', unidad: '', formato: f1 },
 ]
 
@@ -34,31 +34,33 @@ function FilaEstacion({ id, onQuitar }: { id: string; onQuitar: () => void }) {
   const { estacion, cargando, error } = useEstacion(id)
 
   if (cargando) return (
-    <td colSpan={CAMPOS.length + 1} className="py-4 pl-6 text-center">
+    <td colSpan={CAMPOS.length + 1} className="text-center align-middle">
       <Cargando mensaje="Cargando..." />
     </td>
   )
 
   if (error || !estacion) return (
-    <td colSpan={CAMPOS.length + 1} className="py-4 pl-6">
+    <td colSpan={CAMPOS.length + 1} className="text-center align-middle">
       <MensajeError mensaje={error ?? 'Sin datos'} />
     </td>
   )
 
   return (
     <>
-      <td className="py-3 pr-4 pl-6 min-w-40 sticky left-0 z-10 bg-white border-r border-gray-100">
-        <div className="font-semibold text-gray-800 text-sm">{estacion.nombre}</div>
-        <InsigniaFwi estado={estacion['Estado FWI']} tamaño="sm" />
-        <div className="text-xs text-gray-400 mt-1">{formatearFecha(estacion.Date)} · {estacion.Hora}</div>
-        <button onClick={onQuitar} className="text-xs text-red-400 hover:underline mt-1">
-          Quitar
-        </button>
+      <td className="min-w-40 sticky left-0 z-10 border-r border-(--color-divider) text-center align-middle" style={{ background: 'var(--color-bg)' }}>
+        <div className="flex flex-col items-center">
+          <div className="font-semibold text-sm">{estacion.nombre}</div>
+          <InsigniaFwi estado={estacion['Estado FWI']} tamaño="sm" />
+          <div className="text-xs mt-1" style={{ color: 'var(--color-neutral-600)' }}>{formatearFecha(estacion.Date)} · {estacion.Hora}</div>
+          <button onClick={onQuitar} className="btn btn-ghost text-xs mt-1 px-0">
+            Quitar
+          </button>
+        </div>
       </td>
       {CAMPOS.map(({ clave, unidad, formato }) => {
         const valor = estacion[clave as keyof typeof estacion]
         return (
-          <td key={clave} className="py-3 pr-6 text-sm text-gray-700 font-medium">
+          <td key={clave} className="text-sm font-medium tabular-nums text-center align-middle">
             {formato ? formato(valor) : valor}{unidad}
           </td>
         )
@@ -82,71 +84,79 @@ export function Comparar() {
 
   return (
     <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Comparar estaciones</h1>
-        <p className="text-sm text-gray-500 mt-1">
-          Seleccioná las estaciones que querés comparar.
+      <header className="pb-4 mb-6 border-b-2 border-(--color-divider)">
+        <p className="text-[11px] font-semibold tracking-[0.12em] uppercase" style={{ color: 'var(--color-neutral-700)' }}>
+          Parque Nacional Lanín
         </p>
-      </div>
+        <h1 className="font-heading font-extrabold text-3xl tracking-[-0.02em]">Comparar estaciones</h1>
+      </header>
 
-      <div className="flex flex-col">
-        <div className="order-2 lg:order-1 mb-6">
-          <p className="text-xs text-gray-400 mb-3 uppercase tracking-wide">Agregar estación</p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {estaciones.map((est) => {
-              const seleccionada = seleccionadas.includes(est.id)
-              return (
-                <button
-                  key={est.id}
-                  onClick={() => agregar(est.id)}
-                  disabled={seleccionada}
-                  className={`relative overflow-hidden text-left bg-white rounded-xl border border-gray-200 pl-5 p-4 transition-all focus:outline-none focus:ring-2 focus:ring-emerald-400 ${
-                    seleccionada
-                      ? 'opacity-40 cursor-not-allowed'
-                      : 'cursor-pointer hover:shadow-md hover:border-emerald-300'
-                  }`}
-                >
-                  <span className="absolute left-0 top-0 h-full w-1.5 bg-gradient-to-b from-emerald-500 via-amber-500 to-red-500" />
-                  <span className="absolute -right-1 -top-2 text-2xl font-black text-gray-100 select-none pointer-events-none tracking-tight whitespace-nowrap">
-                    {obtenerEtiquetaFuente(est.api)}
-                  </span>
-                  <h3 className="relative font-semibold text-gray-900 text-base leading-tight truncate pr-4">
-                    {est.nombre}
-                  </h3>
-                  <p className="relative text-xs text-gray-400 mt-0.5">{est.id}</p>
-                </button>
-              )
-            })}
-          </div>
-        </div>
+      <p className="text-sm mb-4" style={{ color: 'var(--color-neutral-700)' }}>
+        Hasta cuatro estaciones en paralelo. Tocá una tarjeta de abajo para sumarla o quitarla.
+      </p>
 
-        {seleccionadas.length === 0 ? (
-          <p className="order-1 lg:order-2 text-gray-400 text-center py-16">
-            Seleccioná al menos una estación para comparar.
-          </p>
-        ) : (
-          <div className="order-1 lg:order-2 mb-6 lg:mb-0 bg-white rounded-xl border border-gray-200 overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-gray-100 text-xs text-gray-400 uppercase">
-                  <th className="py-3 pr-4 pl-6 text-left sticky left-0 z-20 bg-white border-r border-gray-100">Estación</th>
-                  {CAMPOS.map(({ etiqueta }) => (
-                    <th key={etiqueta} className="py-3 pr-6 text-left">
-                      {etiqueta}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {seleccionadas.map((id) => (
-                  <tr key={id} className="border-b border-gray-50">
-                    <FilaEstacion id={id} onQuitar={() => quitar(id)} />
-                  </tr>
+      {seleccionadas.length === 0 ? (
+        <p className="text-center py-16" style={{ color: 'var(--color-neutral-500)' }}>
+          Seleccioná al menos una estación para comparar.
+        </p>
+      ) : (
+        <div className="overflow-x-auto border-2 border-(--color-divider) mb-8">
+          <table className="table" style={{ whiteSpace: 'nowrap' }}>
+            <thead>
+              <tr>
+                <th className="text-center align-middle sticky left-0 z-20 border-r border-(--color-divider)" style={{ background: 'var(--color-surface)' }}>
+                  Estación
+                </th>
+                {CAMPOS.map(({ etiqueta }) => (
+                  <th key={etiqueta} className="text-center align-middle">
+                    {etiqueta}
+                  </th>
                 ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+              </tr>
+            </thead>
+            <tbody>
+              {seleccionadas.map((id) => (
+                <tr key={id}>
+                  <FilaEstacion id={id} onQuitar={() => quitar(id)} />
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      <p className="text-[11px] font-semibold tracking-[0.12em] uppercase mb-3" style={{ color: 'var(--color-neutral-700)' }}>
+        Estaciones disponibles
+      </p>
+      <div className="grid [grid-template-columns:repeat(auto-fit,minmax(230px,1fr))]">
+        {estaciones.map((est) => {
+          const seleccionada = seleccionadas.includes(est.id)
+          const config = obtenerConfigEstado(est.estado_fwi)
+          return (
+            <button
+              key={est.id}
+              onClick={() => (seleccionada ? quitar(est.id) : agregar(est.id))}
+              className="text-left border-0 cursor-pointer flex items-baseline justify-between gap-3 px-4 py-3.5"
+              style={{
+                borderTop: `4px solid ${config.tono}`,
+                borderRight: '1px solid var(--color-divider)',
+                borderBottom: '1px solid var(--color-divider)',
+                background: seleccionada ? 'var(--color-text)' : 'var(--color-bg)',
+                color: seleccionada ? '#fff' : 'var(--color-text)',
+              }}
+            >
+              <span className="min-w-0">
+                <span className="block font-heading font-extrabold text-base tracking-[-0.01em] overflow-hidden text-ellipsis whitespace-nowrap">
+                  {est.nombre}
+                </span>
+                <span className="block text-[11px] tracking-[0.08em] uppercase opacity-75">
+                  {config.etiqueta}
+                </span>
+              </span>
+              <span className="font-heading font-extrabold text-xl tabular-nums shrink-0">{f1(est.fwi)}</span>
+            </button>
+          )
+        })}
       </div>
     </div>
   )

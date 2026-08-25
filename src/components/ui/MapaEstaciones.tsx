@@ -8,6 +8,7 @@ import { useConfigEstaciones } from '../../hooks/useConfigEstaciones'
 import { InsigniaFwi } from './InsigniaFwi'
 import { Cargando } from './Cargando'
 import { formatearFecha } from '../../utils/fecha'
+import { obtenerConfigEstado } from '../../utils/fwi'
 import type { ResumenEstacion } from '../../types'
 
 interface Marcador {
@@ -19,35 +20,25 @@ interface Marcador {
   resumen: ResumenEstacion | null
 }
 
-const COLOR_ESTADO: Record<string, string> = {
-  BAJO:      '#16a34a',
-  MODERADO:  '#ca8a04',
-  ALTO:      '#ea580c',
-  'MUY ALTO':'#dc2626',
-  SEVERO:    '#991b1b',
-  EXTREMO:   '#7c3aed',
-}
-
 function urlWunderground(idEstacion: string): string {
   const hoy = new Date().toISOString().slice(0, 10)
   return `https://www.wunderground.com/dashboard/pws/${idEstacion}/table/${hoy}/${hoy}/daily`
 }
 
 function crearIcono(estadoFwi: string, fwi: string): L.DivIcon {
-  const color = COLOR_ESTADO[estadoFwi?.toUpperCase()] ?? '#6b7280'
+  const config = obtenerConfigEstado(estadoFwi)
   const valor = isNaN(parseFloat(fwi)) ? '?' : Math.round(parseFloat(fwi)).toString()
   return L.divIcon({
     className: '',
     html: `<div style="
-      background:${color};color:#fff;border-radius:50%;
-      width:40px;height:40px;display:flex;align-items:center;
-      justify-content:center;font-weight:700;font-size:12px;
-      border:2.5px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.35);
+      background:${config.tono};color:${config.texto};border:2px solid #201e1d;
+      width:36px;height:36px;display:flex;align-items:center;
+      justify-content:center;font-family:'Archivo',system-ui,sans-serif;font-weight:800;font-size:13px;
       cursor:pointer;
     ">${valor}</div>`,
-    iconSize: [40, 40],
-    iconAnchor: [20, 20],
-    popupAnchor: [0, -22],
+    iconSize: [36, 36],
+    iconAnchor: [18, 18],
+    popupAnchor: [0, -20],
   })
 }
 
@@ -81,25 +72,21 @@ export function MapaEstaciones() {
   }, [marcadores])
 
   return (
-    <div className="rounded-xl overflow-hidden border border-gray-200 shadow-sm bg-white h-full flex flex-col">
-      <div className="px-4 py-2.5 border-b border-gray-100 bg-gradient-to-r from-emerald-50 via-amber-50 to-orange-50 flex items-center justify-between gap-2">
-        <p className="text-xs font-semibold text-emerald-800 uppercase tracking-wide">
-          Mapa interactivo
-        </p>
-      </div>
+    <div className="h-full flex flex-col">
+      <h2 className="font-heading font-extrabold text-lg tracking-[-0.01em] mb-4">Mapa</h2>
 
       {cargandoEst || cargandoCfg ? (
-        <div style={{ height: 440 }}>
+        <div className="border-2 border-(--color-divider)" style={{ height: 420 }}>
           <Cargando mensaje="Cargando mapa..." />
         </div>
       ) : marcadores.length === 0 ? (
-        <div className="flex items-center justify-center" style={{ height: 440 }}>
-          <p className="text-sm text-gray-400 text-center px-6">
+        <div className="flex items-center justify-center border-2 border-(--color-divider)" style={{ height: 420 }}>
+          <p className="text-sm text-center px-6" style={{ color: 'var(--color-neutral-600)' }}>
             El mapa interactivo no está disponible: la API no informó coordenadas de las estaciones.
           </p>
         </div>
       ) : (
-        <div style={{ height: 440 }}>
+        <div className="border-2 border-(--color-divider)" style={{ height: 420 }}>
           <MapContainer
             bounds={bounds}
             boundsOptions={{ padding: [40, 40] }}
@@ -118,25 +105,25 @@ export function MapaEstaciones() {
               >
                 <Popup minWidth={200}>
                   <div className="p-1">
-                    <p className="font-semibold text-gray-900 text-sm mb-1">{m.nombre}</p>
-                    <p className="text-xs text-gray-400 mb-2">{m.id} · {m.api}</p>
+                    <p className="font-heading font-extrabold text-sm mb-1">{m.nombre}</p>
+                    <p className="text-xs mb-2" style={{ color: 'var(--color-neutral-600)' }}>{m.id} · {m.api}</p>
                     {m.resumen && (
                       <>
                         <div className="mb-2">
                           <InsigniaFwi estado={m.resumen.estado_fwi} tamaño="sm" />
                         </div>
-                        <div className="text-sm space-y-0.5 text-gray-700 mb-3">
-                          <div>FWI: <span className="font-bold text-blue-700">{m.resumen.fwi}</span></div>
+                        <div className="text-sm space-y-0.5 mb-3">
+                          <div>FWI: <span className="font-heading font-extrabold">{m.resumen.fwi}</span></div>
                           <div>Temp: {m.resumen.temperatura}°C · HR: {m.resumen.humedad}%</div>
                           <div>Viento: {m.resumen.viento} km/h</div>
-                          <div className="text-xs text-gray-400">{formatearFecha(m.resumen.fecha)} {m.resumen.hora}</div>
+                          <div className="text-xs" style={{ color: 'var(--color-neutral-600)' }}>{formatearFecha(m.resumen.fecha)} {m.resumen.hora}</div>
                         </div>
                       </>
                     )}
                     <div className="flex items-center gap-3">
                       <button
                         onClick={() => navigate(`/estacion/${m.id}`)}
-                        className="text-sm text-blue-600 hover:underline font-medium"
+                        className="btn btn-ghost text-sm"
                       >
                         Ver detalle →
                       </button>
@@ -145,7 +132,7 @@ export function MapaEstaciones() {
                           href={urlWunderground(m.id)}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-sm text-sky-600 hover:underline font-medium"
+                          className="text-sm"
                         >
                           Wunderground ↗
                         </a>

@@ -103,33 +103,33 @@ export function GraficoLinea({ titulo, unidad, datos, años, colores, esSuma, do
       <div
         onClick={() => setExpandido(true)}
         title="Clic para ampliar con zoom"
-        className="bg-gray-50 rounded-xl border border-gray-100 p-4 cursor-pointer hover:border-blue-300 hover:shadow-sm transition-all"
+        className="border-2 border-(--color-divider) p-4 cursor-pointer"
       >
         <div className="flex items-baseline justify-between mb-3">
-          <h3 className="font-semibold text-gray-800 text-sm">{titulo}</h3>
-          <span className="text-xs text-gray-400">
+          <h3 className="font-heading font-extrabold text-sm">{titulo}</h3>
+          <span className="text-xs" style={{ color: 'var(--color-neutral-600)' }}>
             {esSuma ? 'acumulado diario' : 'valor diario'} · {unidad}
           </span>
         </div>
         <ResponsiveContainer width="100%" height={300}>
           <LineChart data={datos} margin={{ top: 4, right: 16, left: 0, bottom: 4 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--color-neutral-300)" />
             <XAxis
               dataKey="dia"
-              tick={{ fontSize: 11, fill: '#9ca3af' }}
+              tick={{ fontSize: 11, fill: 'var(--color-neutral-600)' }}
               tickFormatter={formatearEtiquetaDia}
               ticks={INICIOS_MES}
             />
             <YAxis
               domain={dominio ?? ['auto', 'auto']}
-              tick={{ fontSize: 11, fill: '#9ca3af' }}
+              tick={{ fontSize: 11, fill: 'var(--color-neutral-600)' }}
               width={48}
               tickFormatter={v => `${v}${unidad}`}
             />
             <Tooltip
               labelFormatter={label => typeof label === 'string' ? formatearEtiquetaDia(label) : label}
               formatter={value => typeof value === 'number' ? [`${value.toFixed(1)} ${unidad}`, ''] : ['-', '']}
-              contentStyle={{ fontSize: 12, borderRadius: 8, border: '1px solid #e5e7eb' }}
+              contentStyle={{ fontSize: 12, borderRadius: 0, border: '2px solid var(--color-divider)', fontFamily: 'var(--font-body)' }}
             />
             <Legend wrapperStyle={{ fontSize: 12 }} />
             {lineas}
@@ -150,16 +150,13 @@ export function GraficoLinea({ titulo, unidad, datos, años, colores, esSuma, do
               </div>
               {zoomed ? (
                 <div className="flex items-center gap-3 shrink-0">
-                  <span className="text-xs text-gray-400">Arrastrá para hacer más zoom</span>
-                  <button
-                    onClick={resetearZoom}
-                    className="text-xs text-indigo-500 hover:text-indigo-700 transition-colors flex items-center gap-1"
-                  >
+                  <span className="text-xs" style={{ color: 'var(--color-neutral-600)' }}>Arrastrá para hacer más zoom</span>
+                  <button onClick={resetearZoom} className="btn btn-ghost text-xs">
                     ↺ Restablecer
                   </button>
                 </div>
               ) : (
-                <span className="text-xs text-gray-400 shrink-0">
+                <span className="text-xs shrink-0" style={{ color: 'var(--color-neutral-600)' }}>
                   Arrastrá para hacer zoom
                 </span>
               )}
@@ -167,7 +164,7 @@ export function GraficoLinea({ titulo, unidad, datos, años, colores, esSuma, do
 
             {zoomed ? (
               // Vista zoomeada: gráfico ancho scrolleable horizontalmente, con drag-to-zoom para afinar
-              <div ref={scrollRef} className="overflow-x-auto rounded-lg">
+              <div ref={scrollRef} className="overflow-x-auto">
                 <div style={{ width: anchoChart ?? '100%', height: 540, minWidth: '100%' }}>
                   <LineChart
                     width={anchoChart ?? 900}
@@ -188,38 +185,38 @@ export function GraficoLinea({ titulo, unidad, datos, años, colores, esSuma, do
                     onMouseUp={aplicarZoom}
                     onMouseLeave={() => { if (seleccionando) resetearZoom() }}
                   >
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--color-neutral-300)" />
                     <XAxis
                       dataKey="dia"
-                      tick={{ fontSize: 11, fill: '#9ca3af' }}
+                      tick={{ fontSize: 11, fill: 'var(--color-neutral-600)' }}
                       tickFormatter={formatearEtiquetaDia}
                       ticks={ticksScrolleable}
                     />
                     <YAxis
                       domain={dominio ?? ['auto', 'auto']}
-                      tick={{ fontSize: 11, fill: '#9ca3af' }}
+                      tick={{ fontSize: 11, fill: 'var(--color-neutral-600)' }}
                       width={48}
                       tickFormatter={v => `${v}${unidad}`}
                     />
                     <Tooltip
                       labelFormatter={label => typeof label === 'string' ? formatearEtiquetaDia(label) : label}
                       formatter={value => typeof value === 'number' ? [`${value.toFixed(1)} ${unidad}`, ''] : ['-', '']}
-                      contentStyle={{ fontSize: 12, borderRadius: 8, border: '1px solid #e5e7eb' }}
+                      contentStyle={{ fontSize: 12, borderRadius: 0, border: '2px solid var(--color-divider)', fontFamily: 'var(--font-body)' }}
                     />
                     <Legend wrapperStyle={{ fontSize: 12 }} />
                     <ReferenceArea
                       x1={limiteIzq}
                       x2={limiteDer}
-                      fill="#6366f1"
+                      fill="var(--color-accent)"
                       fillOpacity={0.08}
                     />
                     {seleccionando && refIzq && refDer && (
                       <ReferenceArea
                         x1={refIzq}
                         x2={refDer}
-                        fill="#6366f1"
+                        fill="var(--color-accent)"
                         fillOpacity={0.18}
-                        stroke="#6366f1"
+                        stroke="var(--color-accent)"
                         strokeOpacity={0.5}
                       />
                     )}
@@ -247,32 +244,32 @@ export function GraficoLinea({ titulo, unidad, datos, años, colores, esSuma, do
                   onMouseUp={aplicarZoom}
                   onMouseLeave={() => { if (seleccionando) resetearZoom() }}
                 >
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--color-neutral-300)" />
                   <XAxis
                     dataKey="dia"
-                    tick={{ fontSize: 11, fill: '#9ca3af' }}
+                    tick={{ fontSize: 11, fill: 'var(--color-neutral-600)' }}
                     tickFormatter={formatearEtiquetaDia}
                     ticks={INICIOS_MES}
                   />
                   <YAxis
                     domain={dominio ?? ['auto', 'auto']}
-                    tick={{ fontSize: 11, fill: '#9ca3af' }}
+                    tick={{ fontSize: 11, fill: 'var(--color-neutral-600)' }}
                     width={48}
                     tickFormatter={v => `${v}${unidad}`}
                   />
                   <Tooltip
                     labelFormatter={label => typeof label === 'string' ? formatearEtiquetaDia(label) : label}
                     formatter={value => typeof value === 'number' ? [`${value.toFixed(1)} ${unidad}`, ''] : ['-', '']}
-                    contentStyle={{ fontSize: 12, borderRadius: 8, border: '1px solid #e5e7eb' }}
+                    contentStyle={{ fontSize: 12, borderRadius: 0, border: '2px solid var(--color-divider)', fontFamily: 'var(--font-body)' }}
                   />
                   <Legend wrapperStyle={{ fontSize: 12 }} />
                   {seleccionando && refIzq && refDer && (
                     <ReferenceArea
                       x1={refIzq}
                       x2={refDer}
-                      fill="#6366f1"
+                      fill="var(--color-accent)"
                       fillOpacity={0.12}
-                      stroke="#6366f1"
+                      stroke="var(--color-accent)"
                       strokeOpacity={0.4}
                     />
                   )}
