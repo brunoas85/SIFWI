@@ -55,8 +55,8 @@ export function Login() {
       <div className="flex items-center justify-center p-6 sm:p-12">
         <div className="w-full max-w-[360px]">
           <div className="flex gap-6 mb-10">
-            <img src={`${import.meta.env.BASE_URL}logo_pnl.png`} alt="Parque Nacional Lanín" className="h-26 w-auto object-contain mix-blend-multiply" />
-            <img src={`${import.meta.env.BASE_URL}logo_ice.png`} alt="ICE" className="h-26 w-auto object-contain mix-blend-multiply" />
+            <img src={`${import.meta.env.BASE_URL}logo_pnl.png`} alt="Parque Nacional Lanín" className="h-26 w-auto object-contain" />
+            <img src={`${import.meta.env.BASE_URL}logo_ice.png`} alt="ICE" className="h-26 w-auto object-contain" />
           </div>
           <h2 className="font-heading font-extrabold text-[28px] tracking-[-0.02em] mb-1">Ingresar</h2>
           <p className="text-sm mb-8" style={{ color: 'var(--color-neutral-700)' }}>

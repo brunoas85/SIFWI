@@ -70,7 +70,7 @@ function ContenidoBarra({ alNavegar }: { alNavegar?: () => void }) {
         <img
           src={`${import.meta.env.BASE_URL}logo_pnl.png`}
           alt="Parque Nacional Lanín"
-          className="h-9 w-9 object-contain shrink-0 mix-blend-multiply"
+          className="h-9 w-9 object-contain shrink-0"
         />
         <div className="min-w-0 text-center">
           <p className="font-heading font-extrabold text-base tracking-[0.14em]">GIM</p>
@@ -79,7 +79,7 @@ function ContenidoBarra({ alNavegar }: { alNavegar?: () => void }) {
         <img
           src={`${import.meta.env.BASE_URL}logo_ice.png`}
           alt="ICE"
-          className="h-9 w-9 object-contain shrink-0 mix-blend-multiply"
+          className="h-9 w-9 object-contain shrink-0"
         />
       </div>
 
