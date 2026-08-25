@@ -39,3 +39,19 @@ export function claveDiaMes(fecha: string): string | null {
   if (!p || p.mes < 0 || p.mes > 11 || p.dia < 1) return null
   return `${String(p.mes + 1).padStart(2, '0')}-${String(p.dia).padStart(2, '0')}`
 }
+
+function fechaHoraADate(fecha: string, hora: string): Date | null {
+  const p = parsearFecha(fecha)
+  if (!p) return null
+  const [horas, minutos, segundos] = hora.split(':').map(n => parseInt(n, 10))
+  if (isNaN(horas) || isNaN(minutos)) return null
+  return new Date(p.anio, p.mes, p.dia, horas, minutos, isNaN(segundos) ? 0 : segundos)
+}
+
+// Horas transcurridas desde una fecha+hora informadas por la API hasta ahora.
+// Se usa para detectar estaciones con datos desactualizados (ver `horasDesde > 24`).
+export function horasDesde(fecha: string, hora: string): number | null {
+  const d = fechaHoraADate(fecha, hora)
+  if (!d) return null
+  return (Date.now() - d.getTime()) / 3_600_000
+}

@@ -1,13 +1,15 @@
 import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useVistaDatosMeteor } from '../hooks/useVistaDatosMeteor'
+import { useVistaDatosMeteor, IDS_SMN } from '../hooks/useVistaDatosMeteor'
 import { useOrdenEstacionesPnl } from '../hooks/useOrdenEstacionesPnl'
 import { normalizarNombre } from '../utils/nombreEstacion'
 import { Cargando } from '../components/ui/Cargando'
 import { MensajeError } from '../components/ui/MensajeError'
 import { f1, f2 } from '../utils/formato'
-import { formatearFecha } from '../utils/fecha'
+import { formatearFecha, horasDesde } from '../utils/fecha'
 import type { VistaMeteorItem } from '../types'
+
+const HORAS_LIMITE_DESACTUALIZADO = 24
 
 interface FilaEstacion {
   nombre: string
@@ -89,33 +91,57 @@ export function VistaMeteorologica() {
                 </tr>
               </thead>
               <tbody>
-                {filas.map(({ nombre, dato: d }) => (
-                  <tr
-                    key={d?.estacion_id ?? nombre}
-                    onClick={d ? () => navigate(`/estacion/${d.estacion_id}`) : undefined}
-                    style={{ cursor: d ? 'pointer' : undefined, color: d ? undefined : 'var(--color-neutral-400)' }}
-                  >
-                    <td
-                      className="font-medium text-center align-middle sticky left-0 z-10 border-r border-(--color-divider)"
-                      style={{ background: 'var(--color-bg)', color: d ? undefined : 'var(--color-neutral-400)' }}
+                {filas.map(({ nombre, dato: d }) => {
+                  const horas = d ? horasDesde(d.fecha, d.hora) : null
+                  const desactualizada = horas !== null && horas > HORAS_LIMITE_DESACTUALIZADO
+                  const esSmn = d ? IDS_SMN.has(d.estacion_id) : false
+                  return (
+                    <tr
+                      key={d?.estacion_id ?? nombre}
+                      onClick={d ? () => navigate(`/estacion/${d.estacion_id}`) : undefined}
+                      style={{ cursor: d ? 'pointer' : undefined, color: d ? undefined : 'var(--color-neutral-400)' }}
                     >
-                      {nombre}
-                    </td>
-                    {d ? (
-                      <>
-                        <td className="text-center align-middle" style={{ color: 'var(--color-neutral-700)' }}>{d.hora}</td>
-                        <td className="text-center align-middle tabular-nums">{f1(d.temperatura)}</td>
-                        <td className="text-center align-middle tabular-nums">{f1(d.humedad)}</td>
-                        <td className="text-center align-middle tabular-nums">{f1(d.viento_kmh)}</td>
-                        <td className="text-center align-middle tabular-nums">{f1(d.viento_10m)}</td>
-                        <td className="text-center align-middle">{d.direccion}</td>
-                        <td className="text-center align-middle tabular-nums">{f2(d.lluvia_ayer)}</td>
-                      </>
-                    ) : (
-                      <td colSpan={7} className="text-center align-middle text-xs">Sin estación configurada en el backend</td>
-                    )}
-                  </tr>
-                ))}
+                      <td
+                        className="font-medium text-center align-middle sticky left-0 z-10 border-r border-(--color-divider)"
+                        style={{ background: 'var(--color-bg)', color: d ? undefined : 'var(--color-neutral-400)' }}
+                      >
+                        {nombre}
+                        {esSmn && (
+                          <span
+                            className="ml-1.5 text-[10px] font-semibold tracking-wide"
+                            style={{ color: 'var(--color-neutral-600)' }}
+                          >
+                            SMN
+                          </span>
+                        )}
+                        {desactualizada && (
+                          <span
+                            className="block text-[10px] font-semibold tracking-wide mt-0.5"
+                            style={{ color: 'var(--color-accent-700)' }}
+                            title={`Sin datos nuevos hace ${Math.floor(horas!)} h`}
+                          >
+                            ⚠ Estación caída
+                          </span>
+                        )}
+                      </td>
+                      {d ? (
+                        <>
+                          <td className="text-center align-middle" style={{ color: desactualizada ? 'var(--color-accent-700)' : 'var(--color-neutral-700)' }}>
+                            {d.hora}
+                          </td>
+                          <td className="text-center align-middle tabular-nums">{f1(d.temperatura)}</td>
+                          <td className="text-center align-middle tabular-nums">{f1(d.humedad)}</td>
+                          <td className="text-center align-middle tabular-nums">{f1(d.viento_kmh)}</td>
+                          <td className="text-center align-middle tabular-nums">{f1(d.viento_10m)}</td>
+                          <td className="text-center align-middle">{d.direccion}</td>
+                          <td className="text-center align-middle tabular-nums">{f2(d.lluvia_ayer)}</td>
+                        </>
+                      ) : (
+                        <td colSpan={7} className="text-center align-middle text-xs">Sin estación configurada en el backend</td>
+                      )}
+                    </tr>
+                  )
+                })}
               </tbody>
             </table>
           </div>

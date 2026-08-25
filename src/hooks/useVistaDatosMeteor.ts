@@ -3,13 +3,15 @@ import { obtenerVistaDatosMeteor, obtenerClimaActualWu, obtenerClimaActualSmn } 
 import type { VistaMeteorItem } from '../types'
 
 // Únicas estaciones SMN activas: Chapelco y Bariloche.
-const IDS_SMN = new Set(['87761', '87765'])
+export const IDS_SMN = new Set(['87761', '87765'])
 
 interface ValorVivo {
   temperatura: number
   humedad: number
   viento_kmh: number
   direccion: string
+  fecha: string
+  hora: string
 }
 
 export function useVistaDatosMeteor() {
@@ -30,23 +32,32 @@ export function useVistaDatosMeteor() {
         // El reporte periódico cubre todas las estaciones (WU + SMN); lo pisamos
         // con los valores en vivo de WU y SMN, consultados a cada API externa en este momento.
         const ahora = new Date()
+        const fechaAhora = ahora.toISOString().slice(0, 10)
         const horaAhora = ahora.toTimeString().slice(0, 5)
         const vivoPorId = new Map<string, ValorVivo>()
         for (const v of vivoWu?.data ?? []) {
+          // WU no informa su propia fecha/hora de observación: al ser una
+          // consulta en vivo a la API externa, usamos el momento de la consulta.
           vivoPorId.set(v.estacion, {
             temperatura: v.temperatura,
             humedad: v.humedad,
             viento_kmh: v.velocidad_viento,
             direccion: v.direccion_viento,
+            fecha: fechaAhora,
+            hora: horaAhora,
           })
         }
         for (const v of vivoSmn?.data ?? []) {
           if (!IDS_SMN.has(v.id)) continue
+          // El SMN sí informa la fecha/hora real de su medición (se actualiza
+          // cada 1 hora): se usa esa, no el momento de la consulta.
           vivoPorId.set(v.id, {
             temperatura: v.temperatura,
             humedad: v.humedad_relativa,
             viento_kmh: v.viento_intensidad,
             direccion: v.viento_direccion,
+            fecha: v.fecha,
+            hora: v.hora,
           })
         }
         const combinados = reporte.data.map(d => {
@@ -58,7 +69,8 @@ export function useVistaDatosMeteor() {
             humedad: v.humedad,
             viento_kmh: v.viento_kmh,
             direccion: v.direccion,
-            hora: horaAhora,
+            fecha: v.fecha,
+            hora: v.hora,
           }
         })
         setDatos(combinados)
