@@ -25,20 +25,18 @@ function urlWunderground(idEstacion: string): string {
   return `https://www.wunderground.com/dashboard/pws/${idEstacion}/table/${hoy}/${hoy}/daily`
 }
 
-function crearIcono(estadoFwi: string, fwi: string): L.DivIcon {
+function crearIcono(estadoFwi: string): L.DivIcon {
   const config = obtenerConfigEstado(estadoFwi)
-  const valor = isNaN(parseFloat(fwi)) ? '?' : Math.round(parseFloat(fwi)).toString()
   return L.divIcon({
     className: '',
     html: `<div style="
-      background:${config.tono};color:${config.texto};border:2px solid #201e1d;
-      width:36px;height:36px;display:flex;align-items:center;
-      justify-content:center;font-family:'Archivo',system-ui,sans-serif;font-weight:800;font-size:13px;
+      background:${config.tono};border:1.5px solid rgba(255,255,255,0.85);border-radius:50%;
+      width:14px;height:14px;box-shadow:0 0 0 1px rgba(32,30,29,0.35);
       cursor:pointer;
-    ">${valor}</div>`,
-    iconSize: [36, 36],
-    iconAnchor: [18, 18],
-    popupAnchor: [0, -20],
+    "></div>`,
+    iconSize: [14, 14],
+    iconAnchor: [7, 7],
+    popupAnchor: [0, -8],
   })
 }
 
@@ -101,7 +99,7 @@ export function MapaEstaciones() {
               <Marker
                 key={m.id}
                 position={[m.lat, m.lng]}
-                icon={crearIcono(m.resumen?.estado_fwi ?? '', m.resumen?.fwi ?? '')}
+                icon={crearIcono(m.resumen?.estado_fwi ?? '')}
               >
                 <Popup minWidth={200}>
                   <div className="p-1">

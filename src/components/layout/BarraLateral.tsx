@@ -8,7 +8,7 @@ import { obtenerConfigEstado } from '../../utils/fwi'
 import { f1 } from '../../utils/formato'
 import type { ResumenEstacion } from '../../types'
 
-const VISTAS = [
+export const VISTAS = [
   { to: '/', etiqueta: 'Panel', fin: true },
   { to: '/comparar', etiqueta: 'Comparar', fin: false },
   { to: '/variables-meteorologicas', etiqueta: 'Ver variables meteorológicas actuales', fin: false },
@@ -66,23 +66,6 @@ function ContenidoBarra({ alNavegar }: { alNavegar?: () => void }) {
 
   return (
     <div className="flex flex-col h-full min-h-0">
-      <div className="p-5 border-b-2 border-(--color-divider) grid grid-cols-[36px_1fr_36px] items-center gap-5">
-        <img
-          src={`${import.meta.env.BASE_URL}logo_pnl.png`}
-          alt="Parque Nacional Lanín"
-          className="h-9 w-9 object-contain shrink-0"
-        />
-        <div className="min-w-0 text-center">
-          <p className="font-heading font-extrabold text-base tracking-[0.14em]">GIM</p>
-          <p className="text-[11px] tracking-wide" style={{ color: 'var(--color-neutral-700)' }}>P. N. Lanín</p>
-        </div>
-        <img
-          src={`${import.meta.env.BASE_URL}logo_ice.png`}
-          alt="ICE"
-          className="h-9 w-9 object-contain shrink-0"
-        />
-      </div>
-
       <nav className="flex flex-col py-2 border-b-2 border-(--color-divider)">
         {VISTAS.map(v => (
           <NavLink key={v.to} to={v.to} end={v.fin} className={claseVista} onClick={alNavegar}>
@@ -138,7 +121,7 @@ function ContenidoBarra({ alNavegar }: { alNavegar?: () => void }) {
         })}
       </div>
 
-      <div className="border-t-2 border-(--color-divider) px-5 py-3">
+      <div className="border-t-2 border-(--color-divider) px-5 py-3 mb-[30px]">
         {usuario && (
           <p className="text-xs mb-1" style={{ color: 'var(--color-neutral-700)' }}>{usuario}</p>
         )}
@@ -154,36 +137,9 @@ function ContenidoBarra({ alNavegar }: { alNavegar?: () => void }) {
 }
 
 export function BarraLateral() {
-  const [abierta, setAbierta] = useState(false)
-
   return (
-    <>
-      {/* Barra superior angosta, solo mobile */}
-      <div className="lg:hidden sticky top-0 z-30 flex items-center gap-3 px-4 py-3 border-b-2 border-(--color-divider)" style={{ background: 'var(--color-bg)' }}>
-        <button
-          onClick={() => setAbierta(true)}
-          className="btn btn-icon"
-          aria-label="Abrir menú"
-        >
-          ☰
-        </button>
-        <p className="font-heading font-extrabold text-sm tracking-[0.14em]">GIM</p>
-      </div>
-
-      {/* Drawer mobile */}
-      {abierta && (
-        <div className="lg:hidden fixed inset-0 z-40 flex">
-          <div className="absolute inset-0" style={{ background: 'color-mix(in srgb, var(--color-neutral-900) 50%, transparent)' }} onClick={() => setAbierta(false)} />
-          <aside className="relative w-72 max-w-[80vw] h-full border-r-2 border-(--color-divider)" style={{ background: 'var(--color-bg)' }}>
-            <ContenidoBarra alNavegar={() => setAbierta(false)} />
-          </aside>
-        </div>
-      )}
-
-      {/* Sidebar fijo, desktop */}
-      <aside className="hidden lg:flex lg:flex-col border-r-2 border-(--color-divider) sticky top-0 h-screen w-66 shrink-0">
-        <ContenidoBarra />
-      </aside>
-    </>
+    <aside className="hidden lg:flex lg:flex-col border-r-2 border-(--color-divider) sticky top-24 h-[calc(100vh-96px)] w-66 shrink-0">
+      <ContenidoBarra />
+    </aside>
   )
 }

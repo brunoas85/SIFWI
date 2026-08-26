@@ -31,12 +31,12 @@ export function DetalleEstacion() {
   ]
 
   const indices = [
-    { etiqueta: 'FFMC', valor: estacion.FFMC },
-    { etiqueta: 'DMC', valor: estacion.DMC },
-    { etiqueta: 'DC', valor: estacion.DC },
-    { etiqueta: 'ISI', valor: estacion.ISI },
-    { etiqueta: 'BUI', valor: estacion.BUI },
-    { etiqueta: 'FWI', valor: f1(estacion.FWI), destacado: true },
+    { etiqueta: 'FFMC', valor: f2(estacion.FFMC) },
+    { etiqueta: 'DMC', valor: f2(estacion.DMC) },
+    { etiqueta: 'DC', valor: f2(estacion.DC) },
+    { etiqueta: 'ISI', valor: f2(estacion.ISI) },
+    { etiqueta: 'BUI', valor: f2(estacion.BUI) },
+    { etiqueta: 'FWI', valor: f2(estacion.FWI), destacado: true },
   ]
 
   return (
